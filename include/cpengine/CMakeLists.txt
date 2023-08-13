@@ -17,6 +17,12 @@ install(TARGETS cp_engine
 
 target_compile_definitions(cp_engine PRIVATE BUILD_DLL)
 
+if (${CMAKE_BUILD_TYPE} MATCHES "Debug")
+    target_compile_definitions(cp_engine PRIVATE _NDEBUG)
+else()
+    target_compile_definitions(cp_engine PRIVATE _RELEASE)
+endif()
+
 add_subdirectory(definitions)
 
 target_sources(cp_engine
@@ -24,4 +30,33 @@ target_sources(cp_engine
         engine.cpp
     PUBLIC
         engine.hpp
+)
+
+find_package(OpenGL REQUIRED)
+
+target_link_libraries(cp_engine
+    PUBLIC
+        opengl32
+        libglew_shared
+        glfw
+        glm
+        cereal
+        stb
+        EnTT::EnTT
+)
+
+target_include_directories(cp_engine 
+    PUBLIC 
+        ../../submodules/glew/include
+        ../../submodules/glfw/include
+        ../../submodules/glm/glm
+        ../../submodules/cereal/include
+        ../../submodules/stb
+        ../../submodules/entt/src
+)
+
+target_link_directories(cp_engine
+    PUBLIC
+        ${CMAKE_BINARY_DIR}/submodules/glew/lib/Debug       
+        ${CMAKE_BINARY_DIR}/submodules/glfw/Debug
 )
