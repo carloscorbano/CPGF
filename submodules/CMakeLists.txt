@@ -19,6 +19,15 @@ set(ONLY_LIBS ON)
 
 add_subdirectory(glew)
 
+install(TARGETS libglew_shared
+        # for executables and dll on Win
+        RUNTIME DESTINATION bin
+        # shared libraries
+        LIBRARY DESTINATION lib
+        # for static libraries
+        ARCHIVE DESTINATION lib
+        INCLUDES DESTINATION include)
+
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)

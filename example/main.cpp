@@ -1,9 +1,10 @@
 #include <iostream>
 
-#include "cpengine/engine.hpp"
-
+#include "game.hpp"
+#include <memory>
 int main()
 {
-    CPGFramework::Engine engine;
+    std::unique_ptr<Game> game(new Game());
+    game->Run();
     return 0;
 }
