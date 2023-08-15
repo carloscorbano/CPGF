@@ -6,7 +6,7 @@
 #include <memory>
 namespace CPGFramework
 {
-    class CPENGINE_API Engine
+    class CPGF_API Engine
     {
     public:
         template<typename T>
@@ -40,7 +40,10 @@ namespace CPGFramework
             return m_modules[typeid(T)];
         }
 
-        void OnWindowCloseEventHandler();
+        void OnWindowCloseEventHandler(void* emitter, void* listener, void* data);
+
+        void __INTERNAL__CreateModules();
+        void __INTERNAL__CleanupModules();
     private:
         Containers::UnorderedRefTypeMap<std::shared_ptr<IEngineModule>> m_modules;
     };

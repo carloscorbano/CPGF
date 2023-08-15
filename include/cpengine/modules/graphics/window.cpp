@@ -15,10 +15,7 @@ namespace CPGFramework
         }
 
         Window::~Window()
-        {
-            printf("DESTROYED WINDOW OBJ\n");
-            GLFWCall(glfwTerminate());
-        }
+        {}
 
         void Window::SetThreadContext(GLFWwindow* ctx)
         {
@@ -40,11 +37,8 @@ namespace CPGFramework
             {
                 if(glfwWindowShouldClose(m_winCtx))
                 {
-                    if(onWindowCloseEvent)
-                    {
-                        onWindowCloseEvent();
-                    }
-
+                    OnWindowCloseEvent owce{};
+                    TriggerEvent<OnWindowCloseEvent>(owce);
                     break;
                 }
 
@@ -91,6 +85,10 @@ namespace CPGFramework
             GLFWCall(glfwSetWindowUserPointer(m_winCtx, &GetEngineRef()));
             //set null context on main thread.
             SetThreadContext(NULL);
+
+            //centralize the window in the monitor.
+            //TODO: change the get primary monitor to a saved one.
+            __INTERNAL__centralizeWindow(glfwGetPrimaryMonitor());
         }
 
         void Window::Update()
@@ -101,5 +99,27 @@ namespace CPGFramework
 
         void Window::LateUpdate()
         {}
+
+        void Window::Cleanup()
+        {
+            GLFWCall(glfwTerminate());
+        }
+
+        void Window::__INTERNAL__centralizeWindow(GLFWmonitor* monitor)
+        {
+            GLFWCall(const GLFWvidmode* vm = glfwGetVideoMode(monitor));
+            int w, h;
+            GLFWCall(glfwGetWindowSize(m_winCtx, &w, &h));
+
+            int whw, whh;
+            whw = (int)((float)w * 0.5f);
+            whh = (int)((float)h * 0.5f);
+
+            int mhw, mhh;
+            mhw = (int)((float)vm->width * 0.5f);
+            mhh = (int)((float)vm->height * 0.5f);
+
+            GLFWCall(glfwSetWindowPos(m_winCtx, mhw - whw, mhh - whh));
+        }
     } // namespace Graphics
 } // namespace CPGFramework

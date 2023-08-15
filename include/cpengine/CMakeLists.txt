@@ -64,4 +64,5 @@ target_sources(cp_engine
 
 add_subdirectory(definitions)
 add_subdirectory(containers)
+add_subdirectory(events)
 add_subdirectory(modules)

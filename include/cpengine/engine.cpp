@@ -7,8 +7,7 @@ namespace CPGFramework
     Engine::Engine()
     {
         printf("ENGINE CREATION AND INITIALIZATION OF ENGINE MODULES\n");
-        AddModule<Graphics::Window>(this);
-        GetModule<Graphics::Window>()->onWindowCloseEvent = std::bind(&Engine::OnWindowCloseEventHandler, this);
+        __INTERNAL__CreateModules();
     }
 
     Engine::~Engine()
@@ -19,13 +18,27 @@ namespace CPGFramework
     void Engine::Run()
     {
         printf("RUNNING ENGINE\n");
-        auto wnd = GetModule<Graphics::Window>();
-        wnd->Initialize();
-        wnd->RunWindowThreadWork();
+        GetModule<Graphics::Window>()->RunWindowThreadWork();
     }
 
-    void Engine::OnWindowCloseEventHandler()
+    void Engine::OnWindowCloseEventHandler(void* emitter, void* listener, void* data)
     {
+        
         printf("RAISED ON WINDOW CLOSE EVENT\n");
+    }
+
+    void Engine::__INTERNAL__CreateModules()
+    {
+        //------------------------------- Window module
+        AddModule<Graphics::Window>(this);
+        auto wnd = GetModule<Graphics::Window>();
+        wnd->BeginListen<Graphics::OnWindowCloseEvent>((void*)this, [&](void* emitter, void* listener, void* data){ OnWindowCloseEventHandler(emitter, listener, data); });
+        wnd->Initialize();
+        //------------------------------- End Window module
+    }
+
+    void Engine::__INTERNAL__CleanupModules()
+    {
+        GetModule<Graphics::Window>()->Cleanup();
     }
 } // namespace CPGFramework

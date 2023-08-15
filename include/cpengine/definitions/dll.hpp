@@ -1,10 +1,18 @@
 #pragma once
 
-#define DLL_EXPORT __declspec(dllexport)
-#define DLL_IMPORT __declspec(dllimport)
+#ifndef DLL_EXPORT
+    #define DLL_EXPORT __declspec(dllexport)
+#endif
+#ifndef DLL_IMPORT
+    #define DLL_IMPORT __declspec(dllimport)
+#endif
 
 #ifdef BUILD_DLL
-#define CPENGINE_API DLL_EXPORT
+    #ifndef CPGF_API
+        #define CPGF_API DLL_EXPORT
+    #endif
 #else
-#define CPENGINE_API DLL_IMPORT
+    #ifndef CPGF_API
+        #define CPGF_API DLL_IMPORT
+    #endif
 #endif
