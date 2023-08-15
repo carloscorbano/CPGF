@@ -1,8 +1,7 @@
 #include "window.hpp"
 #include "glfw.hpp"
 #include <stdexcept>
-
-#include <iostream>
+#include "../../debug/debug.hpp"
 
 namespace CPGFramework
 {
@@ -11,7 +10,7 @@ namespace CPGFramework
         Window::Window(Engine* engine)
             : IEngineModule(engine)
         {
-            printf("CREATED WINDOW OBJ\n");
+            DEBUG_LOG("CREATED WINDOW OBJ");
         }
 
         Window::~Window()

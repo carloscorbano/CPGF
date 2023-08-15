@@ -1,30 +1,29 @@
 #include "engine.hpp"
 #include "modules/graphics/window.hpp"
-#include <iostream>
+#include "debug/debug.hpp"
 
 namespace CPGFramework
 {
     Engine::Engine()
     {
-        printf("ENGINE CREATION AND INITIALIZATION OF ENGINE MODULES\n");
+        DEBUG_LOG("Created Engine obj. Loading Engine Modules...");
         __INTERNAL__CreateModules();
     }
 
     Engine::~Engine()
     {
-        printf("DESTROYED ENGINE OBJ\n");
+        DEBUG_LOG("DESTROYED ENGINE OBJ");
     }
 
     void Engine::Run()
     {
-        printf("RUNNING ENGINE\n");
+        DEBUG_LOG("RUNNING ENGINE");
         GetModule<Graphics::Window>()->RunWindowThreadWork();
     }
 
     void Engine::OnWindowCloseEventHandler(void* emitter, void* listener, void* data)
     {
-        
-        printf("RAISED ON WINDOW CLOSE EVENT\n");
+        DEBUG_LOG("RAISED ON WINDOW CLOSE EVENT");
     }
 
     void Engine::__INTERNAL__CreateModules()

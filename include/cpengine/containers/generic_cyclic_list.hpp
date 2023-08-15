@@ -65,7 +65,7 @@ namespace CPGFramework
             /// @brief Get the data from the given index.
             /// @param index The index of the element (it'll be relative to the head position, so index 0 is the same as the head position).
             /// @return The data.
-            DLL_EXPORT T& Get(const ui32& index) 
+            T& Get(const ui32& index) 
             {
                 return *m_container[((m_head + index) % GetCapacity())];
             }
@@ -73,7 +73,7 @@ namespace CPGFramework
             /// @brief View the container elements.
             /// @param op The operation that will be triggered for each element.
             /// @param reverse If the lookup will be reversed (tail to head).
-            DLL_EXPORT void View(std::function<BOOL(T& element)> op, const BOOL& reverse = false) 
+            void View(std::function<BOOL(T& element)> op, const BOOL& reverse = false) 
             {
                 if(!op) return;
 

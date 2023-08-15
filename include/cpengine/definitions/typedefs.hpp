@@ -26,3 +26,9 @@ typedef glm::vec4 VEC4;
 typedef glm::vec4 COLOR;
 typedef glm::mat4 MAT4;
 typedef glm::quat QUAT;
+
+#define FLOAT_PRECISION 0.001f
+#define DOUBLE_PRECISION 0.001
+
+#define DEFAULT_FIXED_UPDATE_TIME (1.0 / 60.0)
+#define DEFAULT_DRAW_TIMER (1.0 / 60.0)
