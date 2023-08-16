@@ -31,7 +31,10 @@ namespace CPGFramework
             inline GLFWwindow* GetResourcesContext() { return m_resCtx; }
 
             void SetThreadContext(GLFWwindow* ctx);
-            void RunWindowThreadWork();
+            bool WindowWaitEvents();
+
+            void PollEvents();
+            void Draw();
             
             virtual void Initialize() override;
             virtual void Update() override;

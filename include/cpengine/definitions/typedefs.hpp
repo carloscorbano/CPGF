@@ -32,3 +32,7 @@ typedef glm::quat QUAT;
 
 #define DEFAULT_FIXED_UPDATE_TIME (1.0 / 60.0)
 #define DEFAULT_DRAW_TIMER (1.0 / 60.0)
+
+#include <thread>
+typedef std::thread::id THREAD_ID;
+#define NULL_THREAD_ID THREAD_ID()

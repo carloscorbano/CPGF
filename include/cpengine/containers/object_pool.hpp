@@ -127,7 +127,7 @@ namespace CPGFramework
             /// @return 
             const ui32 UsageCount() 
             {
-                return total_size() - m_availableIndexes.size();
+                return TotalSize() - m_availableIndexes.size();
             }
 
             /// @brief Get all objects of the pool.

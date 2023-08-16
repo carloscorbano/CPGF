@@ -30,19 +30,32 @@ namespace CPGFramework
             }
         }
 
-        void Window::RunWindowThreadWork()
+        bool Window::WindowWaitEvents()
         {
-            while(true)
+            if(glfwWindowShouldClose(m_winCtx))
             {
-                if(glfwWindowShouldClose(m_winCtx))
-                {
-                    OnWindowCloseEvent owce{};
-                    TriggerEvent<OnWindowCloseEvent>(owce);
-                    break;
-                }
-
-                GLFWCall(glfwWaitEvents());
+                OnWindowCloseEvent owce{};
+                TriggerEvent<OnWindowCloseEvent>(owce);
+                return false;
             }
+
+            GLFWCall(glfwWaitEvents());
+            return true;
+        }
+
+        void PollEvents()
+        {
+            GLFWCall(glfwPollEvents());
+        }
+
+        void Window::Draw()
+        {
+            GLCall(glClearColor(0.1f, 0.1f, 0.1f, 1.0f));
+            GLCall(glClear(GL_COLOR_BUFFER_BIT));
+
+            //TODO: render draw
+            
+            GLFWCall(glfwSwapBuffers(m_winCtx));
         }
 
         void Window::Initialize()
