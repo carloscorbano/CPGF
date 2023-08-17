@@ -4,10 +4,12 @@
 #include "definitions/typedefs.hpp"
 #include "modules/iengine_module.hpp"
 #include "containers/unordered_ref_type_map.hpp"
+#include "modules/time/timed_action.hpp"
+
 #include <memory>
 namespace CPGFramework
 {
-    class CPGF_API Engine
+    class Engine
     {
         enum class _INTERNAL_ThreadControlState { SETUP, RUNNING, ON_FRAMEWORK_QUIT, CLEANUP_RESOURCES, FINISHED };
     public:
@@ -33,6 +35,10 @@ namespace CPGFramework
     protected:
         Engine();
         ~Engine();
+
+        virtual void Update() = 0;
+        virtual void FixedUpdate() = 0;
+        virtual void LateUpdate() = 0;
 
     private:
         template<typename T, typename... TArgs>
@@ -68,8 +74,11 @@ namespace CPGFramework
         BOOL m_isRunning;
 
         THREAD_ID m_gameLoopID;
-        _INTERNAL_ThreadControlState m_gameLoopState;
         THREAD_ID m_resLoopID;
+        _INTERNAL_ThreadControlState m_gameLoopState;
         _INTERNAL_ThreadControlState m_resLoopState;
+
+        Time::TimedAction m_fixedUpdateTimer;
+        Time::TimedAction m_drawTimer;
     };
 }

@@ -2,16 +2,19 @@
 #include "debug/debug.hpp"
 #include "modules/graphics/window.hpp"
 #include "modules/threading/multithread.hpp"
+#include "modules/time/game_time.hpp"
+#include "modules/time/timed_action.hpp"
 
 namespace CPGFramework
 {
     Engine::Engine()
         : m_isRunning(true), m_gameLoopState(_INTERNAL_ThreadControlState::SETUP),
-          m_resLoopState(_INTERNAL_ThreadControlState::SETUP)
+          m_resLoopState(_INTERNAL_ThreadControlState::SETUP),
+          m_fixedUpdateTimer(DEFAULT_FIXED_UPDATE_TIME),
+          m_drawTimer(DEFAULT_DRAW_TIMER)
     {
         DEBUG_LOG("Created Engine obj. Loading Engine Modules...");
         __INTERNAL__CreateModules();
-        __INTERNAL__boundGameThreads();
     }
 
     Engine::~Engine()
@@ -21,12 +24,15 @@ namespace CPGFramework
 
     void Engine::Run()
     {
+        __INTERNAL__boundGameThreads();
         DEBUG_LOG("RUNNING ENGINE");
         auto wnd = GetModule<Graphics::Window>();
-        while(wnd->WindowWaitEvents()) 
-        {
-            std::this_thread::yield();
-        }
+
+        auto threading = GetModule<Threading::Multithread>();
+        threading->YieldUntil([&]() { return wnd->WindowWaitEvents(); });
+        threading->YieldUntil([&]() { return m_gameLoopState != _INTERNAL_ThreadControlState::FINISHED; });
+
+        __INTERNAL__CleanupModules();
     }
 
     void Engine::OnWindowCloseEventHandler(void* emitter, void* listener, void* data)
@@ -45,6 +51,7 @@ namespace CPGFramework
         //------------------------------- Multithread Module
         AddModule<Threading::Multithread>(this);
         //------------------------------- End Multithread module
+        AddModule<Time::GameTime>(this);
 
         //Initialize all modules.
         for(auto& module : m_modules)
@@ -78,6 +85,7 @@ namespace CPGFramework
     BOOL Engine::__INTERNAL__gameLoop()
     {
         auto wnd = GetModule<Graphics::Window>();
+        auto gtime = GetModule<Time::GameTime>();
 
         switch (m_gameLoopState)
         {
@@ -88,17 +96,24 @@ namespace CPGFramework
             }
             break;
             case _INTERNAL_ThreadControlState::RUNNING:
-            {
+            {                
                 wnd->PollEvents();
-                
+
                 for(auto module : m_modules)
                 {
                     module.second->Update();
                 }
 
-                for(auto module : m_modules)
+                Update();
+
+                if(m_fixedUpdateTimer.Tick(gtime->GetDeltaTimeUnscaled()))
                 {
-                    module.second->FixedUpdate();
+                    for(auto module : m_modules)
+                    {
+                        module.second->FixedUpdate();
+                    }
+
+                    FixedUpdate();
                 }
 
                 for(auto module : m_modules)
@@ -106,17 +121,23 @@ namespace CPGFramework
                     module.second->LateUpdate();
                 }
 
-                wnd->Draw();
+                LateUpdate();
+
+                if(m_drawTimer.Tick(gtime->GetDeltaTimeUnscaled()))
+                {
+                    wnd->Draw();
+                }
             }
             break;
             case _INTERNAL_ThreadControlState::ON_FRAMEWORK_QUIT:
             {
                 //wait resources cleanup
                 m_resLoopState = _INTERNAL_ThreadControlState::CLEANUP_RESOURCES;
-                while(m_resLoopState != _INTERNAL_ThreadControlState::FINISHED) {}
-
+                
+                auto threading = GetModule<Threading::Multithread>();
+                threading->YieldUntil([&]() { return m_resLoopState != _INTERNAL_ThreadControlState::FINISHED; });
+                
                 m_isRunning = false;
-                __INTERNAL__CleanupModules();
                 m_gameLoopState = _INTERNAL_ThreadControlState::FINISHED;
             }
             break;

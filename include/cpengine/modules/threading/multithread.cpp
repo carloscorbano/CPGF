@@ -12,6 +12,17 @@ namespace CPGFramework
         
         Multithread::~Multithread()
         {}
+
+        void Multithread::YieldUntil(std::function<BOOL()> condition)
+        {
+            if(!condition) return;
+            
+            while(condition())
+            {
+                std::this_thread::yield();
+            }
+        }
+
         void Multithread::Initialize()
         {
             DEBUG_LOG("Multithread manager started and running on thread ID [", ToString(std::this_thread::get_id()), "]");
@@ -24,19 +35,12 @@ namespace CPGFramework
             }
         }
 
-
-        void Multithread::Update()
-        {}
-        void Multithread::FixedUpdate()
-        {}
-        void Multithread::LateUpdate()
-        {}
         void Multithread::Cleanup()
         {
             __INTERNAL__joinAllThreads();
         }
 
-        BOOL Multithread::TryBindThreadToWork(std::thread::id& outThreadID, std::function<BOOL()> work) 
+        BOOL Multithread::TryBindThreadToWork(THREAD_ID& outThreadID, std::function<BOOL()> work) 
         {
             std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -71,7 +75,7 @@ namespace CPGFramework
             return m_threads.size() < m_processorCount;
         }
 
-        BOOL Multithread::__INTERNAL__hasIdleThread(std::thread::id& outIdleID) 
+        BOOL Multithread::__INTERNAL__hasIdleThread(THREAD_ID& outIdleID) 
         {
             for(auto& state : m_stateMap) 
             {
@@ -86,7 +90,7 @@ namespace CPGFramework
             return false;
         }
 
-        BOOL Multithread::__INTERNAL__getAvailableThread(std::thread::id& outThreadID) 
+        BOOL Multithread::__INTERNAL__getAvailableThread(THREAD_ID& outThreadID) 
         {
             if(__INTERNAL__hasIdleThread(outThreadID)) 
             {
@@ -104,10 +108,10 @@ namespace CPGFramework
             }
         }
 
-        std::thread::id Multithread::__INTERNAL__createNewThread() 
+        THREAD_ID Multithread::__INTERNAL__createNewThread() 
         {
             m_threads.push_back(std::thread([&] { __INTERNAL__threadWork(); }));
-            std::thread::id id = m_threads[m_threads.size() - 1].get_id();
+            THREAD_ID id = m_threads[m_threads.size() - 1].get_id();
             m_stateMap[id] = ThreadState::IDLE;
             m_threadWorkQueue[id] = std::queue<Containers::PoolValue<WorkData>>();
 
@@ -126,7 +130,7 @@ namespace CPGFramework
             }
         }
 
-        STRING Multithread::ToString(const std::thread::id& id) 
+        STRING Multithread::ToString(const THREAD_ID& id) 
         {
             std::stringstream ss;
             ss << id;
@@ -148,7 +152,7 @@ namespace CPGFramework
             WorkData* wd = pvWd.Data();
 
             //get next target thread.
-            std::thread::id target;
+            THREAD_ID target;
             switch (wd->state)
             {
                 case WorkState::PROCESSING:
@@ -189,7 +193,7 @@ namespace CPGFramework
             }
 
             //if not exists, then check if can create
-            std::thread::id tmp;
+            THREAD_ID tmp;
             if(__INTERNAL__getAvailableThread(tmp)) 
             {
                 //dispatch to the thread queue
@@ -203,7 +207,7 @@ namespace CPGFramework
 
         void Multithread::__INTERNAL__threadWork() 
         {
-            const std::thread::id thisID = std::this_thread::get_id();
+            const THREAD_ID thisID = std::this_thread::get_id();
             DEBUG_LOG("Started Thread Worker with ID [", ToString(thisID), "]");
 
             while(GetEngineRef().IsRunning()) 
@@ -236,7 +240,7 @@ namespace CPGFramework
             DEBUG_LOG("Stopped Thread Worker with ID [", ToString(thisID), "]");
         }
 
-        void Multithread::__INTERNAL__threadWaitIdle(const std::thread::id& id) 
+        void Multithread::__INTERNAL__threadWaitIdle(const THREAD_ID& id) 
         {
             while(m_stateMap[id] == ThreadState::IDLE && GetEngineRef().IsRunning()) 
             {
@@ -244,12 +248,12 @@ namespace CPGFramework
             }
         }
 
-        void Multithread::__INTERNAL__processBoundedWork(const std::thread::id& id) 
+        void Multithread::__INTERNAL__processBoundedWork(const THREAD_ID& id) 
         {
             //run bounded work, if it returns false, then release the bounded worker.
             if(!m_boundedWork[id]()) 
             {
-                for(std::map<std::thread::id, std::function<BOOL()>>::iterator it = m_boundedWork.begin(); it != m_boundedWork.end(); ++it) 
+                for(std::map<THREAD_ID, std::function<BOOL()>>::iterator it = m_boundedWork.begin(); it != m_boundedWork.end(); ++it) 
                 {
                     if(it->first == id) 
                     {
@@ -263,7 +267,7 @@ namespace CPGFramework
             }
         }
 
-        void Multithread::__INTERNAL__processQueue(const std::thread::id& id) 
+        void Multithread::__INTERNAL__processQueue(const THREAD_ID& id) 
         {
             //if there is none work to process, then return.
             if(m_threadWorkQueue[id].empty()) return;
@@ -328,7 +332,7 @@ namespace CPGFramework
         {
             for(auto& work : m_threadWorkQueue) 
             {
-                std::thread::id curID = work.first;
+                THREAD_ID curID = work.first;
                 if(!work.second.empty() && m_stateMap[curID] == ThreadState::IDLE) 
                 {
                     m_stateMap[curID] = ThreadState::BUSY;

@@ -13,11 +13,11 @@ namespace CPGFramework
     protected:
         inline Engine& GetEngineRef() { return *m_engine; }
 
-        virtual void Initialize() = 0;
-        virtual void Update() = 0;
-        virtual void FixedUpdate() = 0;
-        virtual void LateUpdate() = 0;
-        virtual void Cleanup() = 0;
+        virtual void Initialize() {}
+        virtual void Update() {}
+        virtual void FixedUpdate() {}
+        virtual void LateUpdate() {}
+        virtual void Cleanup() {}
     private:
         Engine* m_engine;
     };

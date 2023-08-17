@@ -22,7 +22,11 @@ namespace CPGFramework
             Multithread(Engine* engine);
             ~Multithread();
 
-             /// @brief Try to allocated a thread and bind it to a exclusive work. It will keep allocated until the bounded function returns false.
+            /// @brief Makes the calling thread wait until the condition is false.
+            /// @param condition 
+            void YieldUntil(std::function<BOOL()> condition);
+
+            /// @brief Try to allocated a thread and bind it to a exclusive work. It will keep allocated until the bounded function returns false.
             /// @param outThreadID The allocated thread ID (can be used to specify work target thread ID).
             /// @param work The function that will be executed by the allocated thread.
             /// @return True if it successfully allocated a thread, false if it fails.
@@ -94,9 +98,6 @@ namespace CPGFramework
 
         private:
             void Initialize() override;
-            void Update() override;
-            void FixedUpdate() override;
-            void LateUpdate() override;
             void Cleanup() override;
 
         private:

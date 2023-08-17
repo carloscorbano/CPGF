@@ -5,3 +5,4 @@ target_sources(cp_engine
 
 add_subdirectory(graphics)
 add_subdirectory(threading)
+add_subdirectory(time)

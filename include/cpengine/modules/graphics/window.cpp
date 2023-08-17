@@ -43,7 +43,7 @@ namespace CPGFramework
             return true;
         }
 
-        void PollEvents()
+        void Window::PollEvents()
         {
             GLFWCall(glfwPollEvents());
         }
@@ -91,7 +91,7 @@ namespace CPGFramework
         
             //window setup
             GLFWCall(glfwSetWindowSizeLimits(m_winCtx, DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT, GLFW_DONT_CARE, GLFW_DONT_CARE));
-            GLFWCall(glfwSwapInterval(1)); //TODO: change this to 0
+            GLFWCall(glfwSwapInterval(0));
 
             //set window pointer
             GLFWCall(glfwSetWindowUserPointer(m_winCtx, &GetEngineRef()));
@@ -102,15 +102,6 @@ namespace CPGFramework
             //TODO: change the get primary monitor to a saved one.
             __INTERNAL__centralizeWindow(glfwGetPrimaryMonitor());
         }
-
-        void Window::Update()
-        {}
-
-        void Window::FixedUpdate()
-        {}
-
-        void Window::LateUpdate()
-        {}
 
         void Window::Cleanup()
         {
