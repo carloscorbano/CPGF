@@ -2,7 +2,6 @@
 
 #include "console.hpp"
 #include "../containers/generic_cyclic_list.hpp"
-#include "../definitions/dll.hpp"
 #include "../definitions/typedefs.hpp"
 
 #include <vector>
@@ -40,7 +39,7 @@ namespace CPGFramework
             
             /// @brief Submit the debug data into the container and print to the screen.
             template<typename... Args>
-            DLL_EXPORT void Submit(const DebugType& type, Args... args) 
+            void Submit(const DebugType& type, Args... args) 
             {
                 std::lock_guard<std::mutex> lock(m);
 

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../../definitions/dll.hpp"
 #include "../../definitions/typedefs.hpp"
 #include "../iengine_module.hpp"
 
@@ -25,7 +24,7 @@ namespace CPGFramework
             ~GameTime();
 
         private:
-            void Update() override;            
+            void Update() override;     
 
         public:
             /// @brief Retrieve the delta time, it's scaled by the delta scale.

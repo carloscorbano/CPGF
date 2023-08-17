@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../definitions/typedefs.hpp"
-#include "../definitions/dll.hpp"
 #include <vector>
 #include <stack>
 #include <mutex>
@@ -52,7 +51,7 @@ namespace CPGFramework
     /// @brief The object pool container.
     /// @tparam T 
     template<typename T>
-    class CPGF_API ObjectPool 
+    class ObjectPool 
     {
         public:
             friend struct PoolValue<T>;

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../../definitions/dll.hpp"
 #include "../iengine_module.hpp"
 #include "../../events/event_emitter.hpp"
 
@@ -26,9 +25,9 @@ namespace CPGFramework
             ~Window();
             friend class CPGFramework::Engine;
 
-        private:
             inline GLFWwindow* GetMainContext() { return m_winCtx; }
             inline GLFWwindow* GetResourcesContext() { return m_resCtx; }
+        private:
 
             void SetThreadContext(GLFWwindow* ctx);
             bool WindowWaitEvents();

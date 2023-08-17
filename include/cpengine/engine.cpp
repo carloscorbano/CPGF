@@ -4,6 +4,7 @@
 #include "modules/threading/multithread.hpp"
 #include "modules/time/game_time.hpp"
 #include "modules/time/timed_action.hpp"
+#include "modules/input/input.hpp"
 
 namespace CPGFramework
 {
@@ -26,9 +27,9 @@ namespace CPGFramework
     {
         __INTERNAL__boundGameThreads();
         DEBUG_LOG("RUNNING ENGINE");
-        auto wnd = GetModule<Graphics::Window>();
+        auto wnd = GetModules()->window;
 
-        auto threading = GetModule<Threading::Multithread>();
+        auto threading = GetModules()->multithread;
         threading->YieldUntil([&]() { return wnd->WindowWaitEvents(); });
         threading->YieldUntil([&]() { return m_gameLoopState != _INTERNAL_ThreadControlState::FINISHED; });
 
@@ -44,33 +45,42 @@ namespace CPGFramework
     void Engine::__INTERNAL__CreateModules()
     {
         //------------------------------- Window module
-        AddModule<Graphics::Window>(this);
-        auto wnd = GetModule<Graphics::Window>();
-        wnd->BeginListen<Graphics::OnWindowCloseEvent>((void*)this, [&](void* emitter, void* listener, void* data){ OnWindowCloseEventHandler(emitter, listener, data); });
+        m_modulesContainer.modules.window = std::make_shared<Graphics::Window>(this);
+        m_modulesContainer.list.push_back(m_modulesContainer.modules.window);
+        m_modulesContainer.modules.window->BeginListen<Graphics::OnWindowCloseEvent>((void*)this, [&](void* emitter, void* listener, void* data){ OnWindowCloseEventHandler(emitter, listener, data); });
         //------------------------------- End Window module
         //------------------------------- Multithread Module
-        AddModule<Threading::Multithread>(this);
+        m_modulesContainer.modules.multithread = std::make_shared<Threading::Multithread>(this);
+        m_modulesContainer.list.push_back(m_modulesContainer.modules.multithread);
         //------------------------------- End Multithread module
-        AddModule<Time::GameTime>(this);
+        //------------------------------- GameTime Module
+        m_modulesContainer.modules.gametime = std::make_shared<Time::GameTime>(this);
+        m_modulesContainer.list.push_back(m_modulesContainer.modules.gametime);
+        //------------------------------- End Multithread module
+                //------------------------------- Input Module
+        m_modulesContainer.modules.input = std::make_shared<Input::InputClass>(this);
+        m_modulesContainer.list.push_back(m_modulesContainer.modules.input);
+        //------------------------------- End Multithread module
 
         //Initialize all modules.
-        for(auto& module : m_modules)
+        for(auto& module : m_modulesContainer.list)
         {
-            module.second->Initialize();
+            module->Initialize();
         }
     }
 
     void Engine::__INTERNAL__CleanupModules()
     {
-        for(auto& module : m_modules)
+        auto rit = m_modulesContainer.list.rbegin();
+        for(; rit != m_modulesContainer.list.rend(); ++rit)
         {
-            module.second->Cleanup();
+            (*rit)->Cleanup();
         }
     }
 
     void Engine::__INTERNAL__boundGameThreads()
     {
-        auto mthread = GetModule<Threading::Multithread>();
+        auto mthread = GetModules()->multithread;
         if(!mthread->TryBindThreadToWork(m_gameLoopID, std::bind(&Engine::__INTERNAL__gameLoop, this))) 
         {
             throw std::runtime_error("Failed to create game loop thread");
@@ -84,8 +94,8 @@ namespace CPGFramework
 
     BOOL Engine::__INTERNAL__gameLoop()
     {
-        auto wnd = GetModule<Graphics::Window>();
-        auto gtime = GetModule<Time::GameTime>();
+        auto wnd = GetModules()->window;
+        auto gtime = GetModules()->gametime;
 
         switch (m_gameLoopState)
         {
@@ -99,26 +109,26 @@ namespace CPGFramework
             {                
                 wnd->PollEvents();
 
-                for(auto module : m_modules)
+                for(auto& module : m_modulesContainer.list)
                 {
-                    module.second->Update();
+                    module->Update();
                 }
 
                 Update();
 
                 if(m_fixedUpdateTimer.Tick(gtime->GetDeltaTimeUnscaled()))
                 {
-                    for(auto module : m_modules)
+                    for(auto& module : m_modulesContainer.list)
                     {
-                        module.second->FixedUpdate();
+                        module->FixedUpdate();
                     }
 
                     FixedUpdate();
                 }
 
-                for(auto module : m_modules)
+                for(auto& module : m_modulesContainer.list)
                 {
-                    module.second->LateUpdate();
+                    module->LateUpdate();
                 }
 
                 LateUpdate();
@@ -134,7 +144,7 @@ namespace CPGFramework
                 //wait resources cleanup
                 m_resLoopState = _INTERNAL_ThreadControlState::CLEANUP_RESOURCES;
                 
-                auto threading = GetModule<Threading::Multithread>();
+                auto threading = GetModules()->multithread;
                 threading->YieldUntil([&]() { return m_resLoopState != _INTERNAL_ThreadControlState::FINISHED; });
                 
                 m_isRunning = false;
@@ -149,7 +159,7 @@ namespace CPGFramework
 
     BOOL Engine::__INTERNAL__resourcesLoop()
     {
-        auto wnd = GetModule<Graphics::Window>();
+        auto wnd = GetModules()->window;
         switch (m_resLoopState)
         {
             case _INTERNAL_ThreadControlState::SETUP:

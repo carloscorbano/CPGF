@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../definitions/typedefs.hpp"
-#include "../definitions/dll.hpp"
 #include <vector>
 #include <functional>
 
@@ -13,7 +12,7 @@ namespace CPGFramework
         ///         It keeps looping and inserting the data within the already created nodes.
         /// @tparam T 
         template<typename T>
-        class CPGF_API GenericCyclicList 
+        class GenericCyclicList 
         {
         public:
             /// @brief Default constructor. This class must be initialized with the total length of the container.

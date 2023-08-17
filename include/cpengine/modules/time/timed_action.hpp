@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../../definitions/dll.hpp"
 #include "../../definitions/typedefs.hpp"
 
 namespace CPGFramework

@@ -1,0 +1,12 @@
+target_sources(cp_engine
+    PRIVATE
+        keyboard_mouse.cpp
+        gamepads.cpp
+        input.cpp
+    PUBLIC
+        input_defs.hpp
+        input_common.hpp
+        keyboard_mouse.hpp
+        gamepads.hpp
+        input.hpp
+)

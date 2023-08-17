@@ -20,7 +20,7 @@ namespace CPGFramework
             virtual ~NodeData() {};
         };
 
-        class CPGF_API DataTree 
+        class DataTree 
         {
             /// @brief Internal node information.
             struct _INTERNAL_NODE

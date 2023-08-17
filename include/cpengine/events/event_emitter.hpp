@@ -2,7 +2,6 @@
 
 #include <map>
 #include <functional>
-#include "../definitions/dll.hpp"
 #include "../containers/unordered_ref_type_map.hpp"
 
 namespace CPGFramework 

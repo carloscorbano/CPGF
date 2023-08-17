@@ -1,9 +1,7 @@
 #pragma once
 
-#include "definitions/dll.hpp"
 #include "definitions/typedefs.hpp"
-#include "modules/iengine_module.hpp"
-#include "containers/unordered_ref_type_map.hpp"
+#include "modules/module_container.hpp"
 #include "modules/time/timed_action.hpp"
 
 #include <memory>
@@ -13,17 +11,7 @@ namespace CPGFramework
     {
         enum class _INTERNAL_ThreadControlState { SETUP, RUNNING, ON_FRAMEWORK_QUIT, CLEANUP_RESOURCES, FINISHED };
     public:
-        template<typename T>
-        std::shared_ptr<T> GetModule()
-        {
-            auto iterator = m_modules.find(typeid(T));
-            if(iterator == m_modules.end())
-            {
-                return nullptr;
-            }
-            
-            return std::static_pointer_cast<T>(m_modules[typeid(T)]);
-        }
+        inline EngineModules* GetModules() { return &m_modulesContainer.modules; }
 
         void Run();
 
@@ -41,18 +29,6 @@ namespace CPGFramework
         virtual void LateUpdate() = 0;
 
     private:
-        template<typename T, typename... TArgs>
-        std::shared_ptr<IEngineModule> AddModule(TArgs... args)
-        {
-            auto iterator = m_modules.find(typeid(T));
-            if(iterator == m_modules.end())
-            {
-                m_modules[typeid(T)] = std::make_shared<T>(args...);
-            }
-
-            return m_modules[typeid(T)];
-        }
-
         /// @brief Event raised by the window when it's closed.
         void OnWindowCloseEventHandler(void* emitter, void* listener, void* data);
 
@@ -70,7 +46,7 @@ namespace CPGFramework
         /// @return If the state is ok.
         BOOL __INTERNAL__resourcesLoop();
     private:
-        Containers::UnorderedRefTypeMap<std::shared_ptr<IEngineModule>> m_modules;
+        ModuleContainer m_modulesContainer;
         BOOL m_isRunning;
 
         THREAD_ID m_gameLoopID;

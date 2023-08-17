@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../../definitions/dll.hpp"
 #include "../../definitions/typedefs.hpp"
 #include "../../containers/object_pool.hpp"
 #include <functional>
