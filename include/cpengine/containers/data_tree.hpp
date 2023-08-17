@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../definitions/typedefs.hpp"
-#include "../definitions/dll.hpp"
 #include <vector>
 #include <stack>
 #include <functional>
@@ -110,7 +109,7 @@ namespace CPGFramework
             /// @param ...args Construction arguments.
             /// @return A pointer to the created data.
             template<typename T, typename... Args>
-            DLL_EXPORT T* CreateData(const Node& node, Args... args) 
+            T* CreateData(const Node& node, Args... args) 
             {
                 __INTERNAL__CleanNodeData(node.index);
                 return __INTERNAL__CreateData<T>(node.index, args...);
@@ -121,7 +120,7 @@ namespace CPGFramework
             /// @param node 
             /// @return 
             template<typename T>
-            DLL_EXPORT T* GetData(const Node& node) 
+            T* GetData(const Node& node) 
             {
                 return __INTERNAL__GetData<T>(node.index);
             }
@@ -131,7 +130,7 @@ namespace CPGFramework
             /// @param operation The operation that will run for each object of type T.
             /// @param topToBottom If the search will be from top to bottom or from bottom to top.
             template<typename T>
-            DLL_EXPORT void View(std::function<void(DataTree& tree, Node& node, T& data, BOOL& cancellationToken)> operation, BOOL topToBottom = true) 
+            void View(std::function<void(DataTree& tree, Node& node, T& data, BOOL& cancellationToken)> operation, BOOL topToBottom = true) 
             {
                 View(Node(0), operation, topToBottom);
             }
@@ -141,7 +140,7 @@ namespace CPGFramework
             /// @param operation The operation that will run for each object of type T.
             /// @param topToBottom If the search will be from top to bottom or from bottom to top.
             template<typename T>
-            DLL_EXPORT void View(const Node& starterNode, std::function<void(DataTree& tree, Node& node, T& data, BOOL& cancellationToken)> operation, BOOL topToBottom = true) 
+            void View(const Node& starterNode, std::function<void(DataTree& tree, Node& node, T& data, BOOL& cancellationToken)> operation, BOOL topToBottom = true) 
             {
                 BOOL cancellationToken = false;
                 __INTERNAL__View(starterNode.index, operation, topToBottom, cancellationToken);
@@ -152,7 +151,7 @@ namespace CPGFramework
             /// @param owner The node that will have it's children iterated.
             /// @param operation The operation that will be triggered to process the match data. If the operation returns false, then it'll stop the iteration.
             template<typename T>
-            DLL_EXPORT void ViewChildren(const Node& owner, std::function<BOOL(DataTree& tree, Node& node, T& data)> operation) 
+            void ViewChildren(const Node& owner, std::function<BOOL(DataTree& tree, Node& node, T& data)> operation) 
             {
                 i32 ownerID = owner.index;
                 for(i32& child : m_nodes[ownerID].children) 
@@ -160,7 +159,8 @@ namespace CPGFramework
                     T* d = __INTERNAL__GetData<T>(child);
                     if(d) 
                     {
-                        if(!operation(*this, Node(child), *d)) 
+                        Node c = Node(child);
+                        if(!operation(*this, c, *d)) 
                         {
                             break;
                         }

@@ -5,6 +5,7 @@
 #include "modules/time/game_time.hpp"
 #include "modules/time/timed_action.hpp"
 #include "modules/input/input.hpp"
+#include "modules/resources/resources.hpp"
 
 namespace CPGFramework
 {
@@ -56,11 +57,16 @@ namespace CPGFramework
         //------------------------------- GameTime Module
         m_modulesContainer.modules.gametime = std::make_shared<Time::GameTime>(this);
         m_modulesContainer.list.push_back(m_modulesContainer.modules.gametime);
-        //------------------------------- End Multithread module
-                //------------------------------- Input Module
+        //------------------------------- End GameTime module
+        //------------------------------- Input Module
         m_modulesContainer.modules.input = std::make_shared<Input::InputClass>(this);
         m_modulesContainer.list.push_back(m_modulesContainer.modules.input);
-        //------------------------------- End Multithread module
+        //------------------------------- End Input module
+        //------------------------------- Resources Module
+        m_modulesContainer.modules.resources = std::make_shared<Resources::ResourcesClass>(this);
+        m_modulesContainer.list.push_back(m_modulesContainer.modules.resources);
+        //------------------------------- End Resources module
+
 
         //Initialize all modules.
         for(auto& module : m_modulesContainer.list)

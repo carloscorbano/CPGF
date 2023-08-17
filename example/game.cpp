@@ -1,6 +1,8 @@
 #include "game.hpp"
 #include "cpengine/debug/debug.hpp"
 #include "cpengine/modules/input/input.hpp"
+#include "cpengine/modules/resources/resources.hpp"
+
 Game::Game()
 {}
 

@@ -1,0 +1,9 @@
+target_sources(cp_engine
+    PRIVATE
+        resources.cpp
+        filesystem.cpp
+    PUBLIC
+        resources.hpp
+        filesystem.hpp
+        resource_base.hpp
+)

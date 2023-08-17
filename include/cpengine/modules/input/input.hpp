@@ -6,7 +6,6 @@
 
 namespace CPGFramework
 {
-    class Engine;
     namespace Input
     {
         class InputClass : public IEngineModule
