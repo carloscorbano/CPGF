@@ -141,7 +141,7 @@ namespace CPGFramework
                 } 
                 else 
                 {
-                    fileContent->resource = new T(args...);
+                    fileContent->resource = new T(m_engine, args...);
                     fileContent->usage_count = 1;
                     DEBUG_SUCCESS("Created resource file name ", fileContent->filename, ", starting to run data creation pipeline.");
                 }

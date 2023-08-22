@@ -5,6 +5,7 @@
 
 namespace CPGFramework
 {
+    class Engine;
     namespace Resources
     {
         enum class ResourceState 
@@ -14,8 +15,8 @@ namespace CPGFramework
 
         struct ResourceBase 
         {
-            ResourceBase(const STRING& relativePath, const STRING& filename)
-                : m_relativePath(relativePath), m_filename(filename), alreadyCompiled(false) {}
+            ResourceBase(Engine* engine, const STRING& relativePath, const STRING& filename)
+                : engine(engine), m_relativePath(relativePath), m_filename(filename), alreadyCompiled(false) {}
 
             virtual ~ResourceBase() {}
 
@@ -42,6 +43,7 @@ namespace CPGFramework
             }
         protected:
             BOOL alreadyCompiled;
+            Engine* engine;
         private:
             STRING m_relativePath;
             STRING m_filename;

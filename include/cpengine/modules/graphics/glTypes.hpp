@@ -1,0 +1,35 @@
+#pragma once
+
+#include "glfw.hpp"
+
+namespace CPGFramework 
+{
+    namespace Graphics 
+    {
+        enum class DrawMode 
+        {
+            POINTS = GL_POINTS, LINE_STRIP = GL_LINE_STRIP, LINE_LOOP = GL_LINE_LOOP, 
+            LINES = GL_LINES , LINE_STRIP_ADJACENCY = GL_LINE_STRIP_ADJACENCY, 
+            LINES_ADJACENCY = GL_LINES_ADJACENCY, TRIANGLE_STRIP = GL_TRIANGLE_STRIP, 
+            TRIANGLE_FAN = GL_TRIANGLE_FAN, TRIANGLES = GL_TRIANGLES, TRIANGLE_STRIP_ADJACENCY = GL_TRIANGLE_STRIP_ADJACENCY,
+            TRIANGLES_ADJACENCY = GL_TRIANGLES_ADJACENCY, PATCHES = GL_PATCHES
+        };
+
+        enum class DrawValueType 
+        {
+            UNSIGNED_BYTE = GL_UNSIGNED_BYTE, UNSIGNED_SHORT = GL_UNSIGNED_SHORT, UNSIGNED_INT = GL_UNSIGNED_INT
+        };
+
+        enum class BufferUsage 
+        {
+            STREAM_DRAW = GL_STREAM_DRAW, STREAM_READ = GL_STREAM_READ, STREAM_COPY = GL_STREAM_COPY, 
+            STATIC_DRAW = GL_STATIC_DRAW, STATIC_READ = GL_STATIC_READ, STATIC_COPY = GL_STATIC_COPY, 
+            DYNAMIC_DRAW = GL_DYNAMIC_DRAW, DYNAMIC_READ = GL_DYNAMIC_READ, DYNAMIC_COPY = GL_DYNAMIC_COPY
+        };
+
+        enum class BufferAccess
+        {
+            READ_ONLY = GL_READ_ONLY, WRITE_ONLY = GL_WRITE_ONLY, READ_WRITE = GL_READ_WRITE
+        };
+    }
+}

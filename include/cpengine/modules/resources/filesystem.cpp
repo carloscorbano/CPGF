@@ -19,7 +19,11 @@ namespace CPGFramework
 
         STRING FileSystem::GetResourcesFolderPath() 
         {
-            return m_execFolder.generic_string().append("/resources");
+            #ifdef NDEBUG_RESOURCES_PATH
+                return STRING(NDEBUG_RESOURCES_PATH);
+            #else
+                return m_execFolder.generic_string().append("/resources");
+            #endif
         }
 
         const BOOL FileSystem::FileExists(const STRING& relativePath, const STRING& filename) 

@@ -8,6 +8,7 @@ endif()
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE Debug)
+set(NDEBUG_RESOURCES_PATH ${PROJECT_SOURCE_DIR}/resources)
 
 add_library(cp_engine SHARED dllmain.cpp)
 install(TARGETS cp_engine
