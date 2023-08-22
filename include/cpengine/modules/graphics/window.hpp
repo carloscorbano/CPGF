@@ -27,6 +27,9 @@ namespace CPGFramework
 
             inline GLFWwindow* GetMainContext() { return m_winCtx; }
             inline GLFWwindow* GetResourcesContext() { return m_resCtx; }
+            inline const bool IsFPSLocked() const { return m_fpsLocked; }
+
+            inline void SetFPSLocked(const bool locked) { m_fpsLocked = locked; }
         private:
 
             void SetThreadContext(GLFWwindow* ctx);
@@ -42,6 +45,7 @@ namespace CPGFramework
         private:
             GLFWwindow* m_winCtx;
             GLFWwindow* m_resCtx;
+            bool m_fpsLocked;
         };
     } // namespace Graphics
 } // namespace CPGFramework

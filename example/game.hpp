@@ -8,6 +8,8 @@ public:
     Game();
     ~Game();
 
+    void OnEngineStart();
+    void OnEngineQuit();
     void Update();
     void FixedUpdate();
     void LateUpdate();

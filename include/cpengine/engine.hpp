@@ -24,6 +24,8 @@ namespace CPGFramework
         Engine();
         ~Engine();
 
+        virtual void OnEngineStart() = 0;
+        virtual void OnEngineQuit() = 0;
         virtual void Update() = 0;
         virtual void FixedUpdate() = 0;
         virtual void LateUpdate() = 0;

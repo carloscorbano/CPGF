@@ -81,13 +81,15 @@ namespace CPGFramework
             Threading::WorkDescriptor wd(engine->GetModules()->multithread.get());
             shader_comp_data* boundedData = wd.BindData<shader_comp_data>();
             boundedData->self = this;
+            boundedData->engine = engine;
             SetResourceState(Resources::ResourceState::LOADING);
 
             //Load operation
             wd.BindOperation(NULL_THREAD_ID, [](Threading::OperationData* data) 
             {
                 shader_comp_data* casted = reinterpret_cast<shader_comp_data*>(data);
-                Resources::FileSystem& fs = casted->engine->GetModules()->resources->GetFileSystem();
+                EngineModules* modules = casted->engine->GetModules();
+                Resources::FileSystem& fs = modules->resources->GetFileSystem();
                 Shader* self = casted->self;
                 
                 casted->vertBuffer = fs.ReadFileBuffer(self->GetRelativePath(), self->GetFilename().append(".vs"));

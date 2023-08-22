@@ -108,6 +108,7 @@ namespace CPGFramework
             case _INTERNAL_ThreadControlState::SETUP:
             {
                 wnd->SetThreadContext(wnd->GetMainContext());
+                OnEngineStart();
                 m_gameLoopState = _INTERNAL_ThreadControlState::RUNNING;
             }
             break;
@@ -139,7 +140,7 @@ namespace CPGFramework
 
                 LateUpdate();
 
-                if(m_drawTimer.Tick(gtime->GetDeltaTimeUnscaled()))
+                if(!wnd->IsFPSLocked() || m_drawTimer.Tick(gtime->GetDeltaTimeUnscaled()))
                 {
                     wnd->Draw();
                 }
@@ -147,6 +148,7 @@ namespace CPGFramework
             break;
             case _INTERNAL_ThreadControlState::ON_FRAMEWORK_QUIT:
             {
+                OnEngineQuit();
                 //wait resources cleanup
                 m_resLoopState = _INTERNAL_ThreadControlState::CLEANUP_RESOURCES;
                 

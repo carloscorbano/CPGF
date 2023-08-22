@@ -8,7 +8,7 @@ namespace CPGFramework
     namespace Graphics
     {
         Window::Window(Engine* engine)
-            : IEngineModule(engine)
+            : IEngineModule(engine), m_fpsLocked(true)
         {
             DEBUG_LOG("CREATED WINDOW OBJ");
         }
