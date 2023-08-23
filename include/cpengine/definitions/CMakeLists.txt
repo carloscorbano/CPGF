@@ -1,6 +1,7 @@
 target_sources(cp_engine
     PUBLIC
         typedefs.hpp
+        dll.hpp
 )
 
 target_include_directories(cp_engine 

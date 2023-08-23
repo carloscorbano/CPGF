@@ -11,6 +11,7 @@ namespace CPGFramework
     namespace Threading     { class Multithread;    }
     namespace Time          { class GameTime;       }
     namespace Resources     { class ResourcesClass; }
+    namespace World         { class WorldClass;     }
 
     struct EngineModules
     {
@@ -19,6 +20,7 @@ namespace CPGFramework
         std::shared_ptr<Threading::Multithread>     multithread = nullptr;
         std::shared_ptr<Time::GameTime>             gametime = nullptr;
         std::shared_ptr<Resources::ResourcesClass>  resources = nullptr;
+        std::shared_ptr<World::WorldClass>          world = nullptr;
     };
 
     struct ModuleContainer

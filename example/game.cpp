@@ -5,6 +5,10 @@
 #include "cpengine/modules/graphics/shader.hpp"
 #include "cpengine/modules/graphics/texture2D.hpp"
 
+#include "cpengine/modules/world/world.hpp"
+#include "cpengine/modules/world/entity.hpp"
+#include "cpengine/components/transform.hpp"
+
 Game::Game()
 {}
 
@@ -17,6 +21,8 @@ void Game::OnEngineStart()
 {
     GetModules()->resources->Load<CPGFramework::Graphics::Shader>("shaders", "simple");
     GetModules()->resources->Load<CPGFramework::Graphics::Texture2D>("textures", "tex.jpg");
+    CPGFramework::World::Entity entity;
+    entity.AddComponent<CPGFramework::Components::Transform>();
 }
 
 void Game::OnEngineQuit()

@@ -89,6 +89,8 @@
         "xtree": "cpp",
         "xutility": "cpp",
         "numeric": "cpp",
-        "filesystem": "cpp"
+        "filesystem": "cpp",
+        "any": "cpp",
+        "*.rh": "cpp"
     }
 }

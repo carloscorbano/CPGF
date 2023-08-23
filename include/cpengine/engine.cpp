@@ -6,6 +6,7 @@
 #include "modules/time/timed_action.hpp"
 #include "modules/input/input.hpp"
 #include "modules/resources/resources.hpp"
+#include "modules/world/world.hpp"
 
 namespace CPGFramework
 {
@@ -66,7 +67,10 @@ namespace CPGFramework
         m_modulesContainer.modules.resources = std::make_shared<Resources::ResourcesClass>(this);
         m_modulesContainer.list.push_back(m_modulesContainer.modules.resources);
         //------------------------------- End Resources module
-
+        //------------------------------- World Module
+        m_modulesContainer.modules.world = std::make_shared<World::WorldClass>(this);
+        m_modulesContainer.list.push_back(m_modulesContainer.modules.world);
+        //------------------------------- End World Module
 
         //Initialize all modules.
         for(auto& module : m_modulesContainer.list)

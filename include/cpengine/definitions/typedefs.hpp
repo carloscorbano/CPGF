@@ -27,6 +27,8 @@ typedef glm::vec4 COLOR;
 typedef glm::mat4 MAT4;
 typedef glm::quat QUAT;
 
+#define MAT4_IDENTITY MAT4(1.0)
+
 #define FLOAT_PRECISION 0.001f
 #define DOUBLE_PRECISION 0.001
 
