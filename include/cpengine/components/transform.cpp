@@ -10,5 +10,10 @@ namespace CPGFramework
 
         Transform::~Transform()
         {}
+
+        void Transform::SetParent(Transform& parent)
+        {
+            parentNode = parent.worldNode;
+        }
     } // namespace Components
 } // namespace CPGFramework

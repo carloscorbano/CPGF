@@ -6,6 +6,7 @@ target_sources(cp_engine
         world.hpp
         entity.hpp
         entt.hpp
+        entity_node.hpp
 )
 
 target_link_libraries(cp_engine

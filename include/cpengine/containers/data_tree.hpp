@@ -6,6 +6,7 @@
 #include <functional>
 #include <map>
 #include <mutex>
+#include <stdexcept>
 
 #define INVALID_ID -1
 
@@ -42,9 +43,18 @@ namespace CPGFramework
                     return *this;
                 }
 
-                private:
-                    Node(const i32& index) : index(index) {}
-                    i32 index;
+                bool operator==(const Node& other)
+                {
+                    return index == other.index;
+                }
+
+                Node() : index(-1) {}
+                Node(const i32& index) : index(index) {}
+
+                const i32 GetIndex() const { return index; }
+                const BOOL IsValid() const { return index != -1; }
+            private:
+                i32 index;
             };
 
             DataTree() 
@@ -69,6 +79,7 @@ namespace CPGFramework
             /// @param owner 
             void SetNodeOwner(const Node& node, const Node& owner) 
             {
+                if(!node.IsValid() || !owner.IsValid()) throw std::runtime_error("INVALID NODE INDEX!");
                 __INTERNAL__SetOwner(node.index, owner.index);
             }
 
@@ -77,6 +88,7 @@ namespace CPGFramework
             /// @return 
             Node GetNodeOwner(const Node& node) 
             {
+                if(!node.IsValid()) throw std::runtime_error("INVALID NODE INDEX!");
                 return Node(node.index);
             }
 
@@ -85,6 +97,7 @@ namespace CPGFramework
             /// @return 
             i32 GetNodeChildrenCount(const Node& node) const 
             {
+                if(!node.IsValid()) throw std::runtime_error("INVALID NODE INDEX!");
                 return (i32)m_nodes[node.index].children.size();
             }
             
@@ -92,6 +105,7 @@ namespace CPGFramework
             /// @param node 
             void FreeNode(const Node& node) 
             {
+                if(!node.IsValid()) throw std::runtime_error("INVALID NODE INDEX!");
                 __INTERNAL__FreeNode(node.index);
             }
 
@@ -111,6 +125,7 @@ namespace CPGFramework
             template<typename T, typename... Args>
             T* CreateData(const Node& node, Args... args) 
             {
+                if(!node.IsValid()) throw std::runtime_error("INVALID NODE INDEX!");
                 __INTERNAL__CleanNodeData(node.index);
                 return __INTERNAL__CreateData<T>(node.index, args...);
             }
@@ -122,6 +137,7 @@ namespace CPGFramework
             template<typename T>
             T* GetData(const Node& node) 
             {
+                if(!node.IsValid()) throw std::runtime_error("INVALID NODE INDEX!");
                 return __INTERNAL__GetData<T>(node.index);
             }
 
@@ -142,6 +158,7 @@ namespace CPGFramework
             template<typename T>
             void View(const Node& starterNode, std::function<void(DataTree& tree, Node& node, T& data, BOOL& cancellationToken)> operation, BOOL topToBottom = true) 
             {
+                if(!starterNode.IsValid()) throw std::runtime_error("INVALID NODE INDEX!");
                 BOOL cancellationToken = false;
                 __INTERNAL__View(starterNode.index, operation, topToBottom, cancellationToken);
             }
@@ -153,6 +170,7 @@ namespace CPGFramework
             template<typename T>
             void ViewChildren(const Node& owner, std::function<BOOL(DataTree& tree, Node& node, T& data)> operation) 
             {
+                if(!owner.IsValid()) throw std::runtime_error("INVALID NODE INDEX!");
                 i32 ownerID = owner.index;
                 for(i32& child : m_nodes[ownerID].children) 
                 {
