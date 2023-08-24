@@ -1,9 +1,8 @@
 #pragma once
 
-#include "../iengine_module.hpp"
-#include "entity.hpp"
 #include "../../containers/data_tree.hpp"
-#include "entity_node.hpp"
+#include "../iengine_module.hpp"
+#include "entt.hpp"
 #include <queue>
 
 namespace CPGFramework
@@ -16,6 +15,9 @@ namespace CPGFramework
             friend class Engine;
             WorldClass(Engine* engine);
             ~WorldClass();
+
+            inline entt::registry& GetRegistry()        { return m_registry;    }
+            inline Containers::DataTree& GetHierarchy() { return m_hierarchy;   }
 
         private:
             void Update();

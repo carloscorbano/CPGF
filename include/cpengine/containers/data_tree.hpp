@@ -83,13 +83,21 @@ namespace CPGFramework
                 __INTERNAL__SetOwner(node.index, owner.index);
             }
 
+            /// @brief Check if the node has an owner assigned to it.
+            /// @param node 
+            /// @return 
+            BOOL HasOwner(const Node& node)
+            {
+                return m_nodes[node.index].owner != -1;
+            }
+
             /// @brief Get the owner node of the given node.
             /// @param node 
             /// @return 
             Node GetNodeOwner(const Node& node) 
             {
                 if(!node.IsValid()) throw std::runtime_error("INVALID NODE INDEX!");
-                return Node(node.index);
+                return Node(m_nodes[node.index].owner);
             }
 
             /// @brief Get the number of children nodes of the given node.

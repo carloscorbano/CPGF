@@ -2,6 +2,7 @@ target_sources(cp_engine
     PUBLIC
         typedefs.hpp
         dll.hpp
+        stringify.hpp
 )
 
 target_include_directories(cp_engine 

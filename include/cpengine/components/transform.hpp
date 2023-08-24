@@ -2,6 +2,8 @@
 
 #include "../definitions/typedefs.hpp"
 #include "../containers/data_tree.hpp"
+#include <functional>
+
 namespace CPGFramework
 {
     namespace World { class WorldClass; }
@@ -15,13 +17,19 @@ namespace CPGFramework
             ~Transform();
 
             void SetParent(Transform& parent);
+            Transform* GetParent();
 
-            const MAT4 GetLocalMatrix() const { return m_local; }
+            const MAT4 GetTransformMatrix() const { return m_transform; }
+            const MAT4 WorldToLocalTransformMatrix();
+
+            void Translate(const VEC3& axis, const FLOAT& amount);
         private:
+            void __INTERNAL__ApplyTranslationToChildrenRecursive(Containers::DataTree& hierarchy, Transform& current, const VEC3& value);
+        private:
+            World::WorldClass* worldObj;
             Containers::DataTree::Node worldNode;
-            Containers::DataTree::Node parentNode;
             
-            MAT4 m_local;
+            MAT4 m_transform;
         };
     } // namespace Components
 } // namespace CPGFramework

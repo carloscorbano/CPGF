@@ -1,6 +1,8 @@
 #include "world.hpp"
 #include "../../components/transform.hpp"
 #include "../../debug/debug.hpp"
+#include "entity.hpp"
+#include "entity_node.hpp"
 
 namespace CPGFramework
 {
@@ -21,7 +23,8 @@ namespace CPGFramework
             auto rootNode = m_hierarchy.GetRoot();
             EntityNode* data = m_hierarchy.CreateData<EntityNode>(rootNode);
             data->id = m_registry.create();
-            m_registry.emplace<Components::Transform>(data->id);
+            auto& transform = m_registry.emplace<Components::Transform>(data->id);
+            transform.worldNode = rootNode;
         }
 
         void WorldClass::__INTERNAL__BindCallbacks()
@@ -33,6 +36,31 @@ namespace CPGFramework
 
             m_registry.on_construct<Components::Transform>().connect<&WorldClass::OnTransformComponentAdded>(this);
             m_registry.on_destroy<Components::Transform>().connect<&WorldClass::OnTransformComponentDestroyed>(this);
+
+            // Components::Transform::ReqEnqueueParent = [&](Containers::DataTree::Node child, Containers::DataTree::Node owner)
+            // {
+            //     toParentNodes.push({ child, owner });
+            // };
+
+            // Components::Transform::ReqParentNode = [&](Containers::DataTree::Node node)
+            // {
+            //     return m_hierarchy.GetNodeOwner(node);
+            // };
+
+            // Components::Transform::ReqNodeTransformData = [&](Containers::DataTree::Node fromNode)
+            // {
+            //     EntityNode* en = m_hierarchy.GetData<EntityNode>(fromNode);
+            //     return m_registry.try_get<Components::Transform>(en->id);
+            // };
+
+            // Components::Transform::ReqChildrenIterator = [&](Containers::DataTree::Node node, std::function<BOOL(Components::Transform& childTransform)> operation)
+            // {
+            //     m_hierarchy.ViewChildren<EntityNode>(node, [&](Containers::DataTree& tree, Containers::DataTree::Node& node, EntityNode& data)
+            //     {
+            //         Components::Transform* childTransform = m_registry.try_get<Components::Transform>(data.id);
+            //         return operation(*childTransform);
+            //     });
+            // };
         }
 
         void WorldClass::OnTransformComponentAdded(entt::registry& reg, entt::entity entity)
@@ -42,6 +70,7 @@ namespace CPGFramework
             nodeData->id = entity;
 
             auto& transform = m_registry.get<Components::Transform>(entity);
+            transform.worldObj = this;
             transform.worldNode = node;
             //queue to be added to hierarchy tree.
             toAddToHierarchy.push(entity);
@@ -67,27 +96,22 @@ namespace CPGFramework
         void WorldClass::Update()
         {
             //process queues
-            if(!toAddToHierarchy.empty())
+            while(!toAddToHierarchy.empty())
             {
                 entt::entity e = toAddToHierarchy.front();
                 toAddToHierarchy.pop();
 
-                auto* transform = m_registry.try_get<Components::Transform>(e);
-                if(transform)
+                if(m_registry.valid(e))
                 {
-                    Containers::DataTree::Node target = transform->parentNode;
-                    if(!target.IsValid())
+                    auto* transform = m_registry.try_get<Components::Transform>(e);
+                    if(transform && !m_hierarchy.HasOwner(transform->worldNode))
                     {
-                        target = m_hierarchy.GetRoot();
+                        m_hierarchy.SetNodeOwner(transform->worldNode, m_hierarchy.GetRoot());
                     }
-
-                    m_hierarchy.SetNodeOwner(transform->worldNode, target);
-
-                    DEBUG_LOG("ADDING ENTITY TO HIERARCHY!", transform->worldNode.GetIndex(), target.GetIndex());
                 }
             }
 
-            if(!toRemoveFromHierarchy.empty())
+            while(!toRemoveFromHierarchy.empty())
             {
                 Containers::DataTree::Node n = toRemoveFromHierarchy.front();
                 toRemoveFromHierarchy.pop();
@@ -96,7 +120,7 @@ namespace CPGFramework
                 m_hierarchy.FreeNode(n);
             }
 
-            if(!toDestroyEntity.empty())
+            while(!toDestroyEntity.empty())
             {
                 entt::entity e = toDestroyEntity.front();
                 toDestroyEntity.pop();
