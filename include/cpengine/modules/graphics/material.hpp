@@ -18,7 +18,7 @@ namespace CPGFramework
             Texture2D* texture;
             GLenum unit;
             TextureData() : texture(nullptr), unit(GL_TEXTURE0) {}
-            TextureData(Texture2D* texture, GLenum unit) : texture(texture), unit(unit) {}
+            TextureData(Texture2D* texture, GLenum unit = GL_TEXTURE0) : texture(texture), unit(unit) {}
         };
 
         struct MaterialAttribute

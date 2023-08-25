@@ -146,7 +146,15 @@ namespace CPGFramework
 
                 if(!wnd->IsFPSLocked() || m_drawTimer.Tick(gtime->GetDeltaTimeUnscaled()))
                 {
-                    wnd->Draw();
+                    //TODO: remove draw function from engine.
+                    // wnd->Draw([&](){ Draw(); });
+                    GLCall(glClearColor(0.1f, 0.1f, 0.1f, 1.0f));
+                    GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+
+                    //TODO: render draw
+                    Draw();
+                    
+                    GLFWCall(glfwSwapBuffers(wnd->GetMainContext()));
                 }
             }
             break;

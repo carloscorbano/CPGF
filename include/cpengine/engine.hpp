@@ -29,6 +29,7 @@ namespace CPGFramework
         virtual void Update() = 0;
         virtual void FixedUpdate() = 0;
         virtual void LateUpdate() = 0;
+        virtual void Draw() = 0;
 
     private:
         /// @brief Event raised by the window when it's closed.

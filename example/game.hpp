@@ -3,7 +3,13 @@
 #include "cpengine/engine.hpp"
 #include "cpengine/modules/world/entity.hpp"
 
-class Game : public CPGFramework::Engine
+#include "cpengine/modules/graphics/vertex_array.hpp"
+#include "cpengine/modules/graphics/index_buffer.hpp"
+#include "cpengine/modules/graphics/material.hpp"
+
+using namespace CPGFramework;
+
+class Game : public Engine
 {
 public:
     Game();
@@ -14,7 +20,13 @@ public:
     void Update();
     void FixedUpdate();
     void LateUpdate();
+    void Draw();
 
-    CPGFramework::World::Entity entity;
-    CPGFramework::World::Entity entity2;
+    World::Entity entity;
+    World::Entity entity2;
+
+    Graphics::VertexArray* VA;
+    Graphics::VertexBuffer* VB;
+    Graphics::IndexBuffer* IB;
+    Graphics::Material* material;
 };
