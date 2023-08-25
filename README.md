@@ -12,6 +12,10 @@ This is a game framework that i'm developing in my free time, it's not a game en
 * OpenGL
 * Target: PC
 
+# Documentation #
+
+TODO.
+
 # Compilling #
 
 Tested only on MSVC compiler. Run cmake at root directory. If you don't want the example build, then turn off 'INCLUDE_EXAMPLE' from the CMakeLists.txt
