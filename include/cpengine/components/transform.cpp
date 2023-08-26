@@ -9,15 +9,35 @@ namespace CPGFramework
     namespace Components
     {
         Transform::Transform()
-            : worldObj(nullptr), m_transform(MAT4_IDENTITY)
-        {}
+            :   worldObj(nullptr), m_transform(MAT4_IDENTITY), m_translation(MAT4_IDENTITY),
+                m_rotation(MAT4_IDENTITY), m_scale(MAT4_IDENTITY), m_isDirty(true)
+        {
+            GetTransformMatrix();
+        }
 
         Transform::~Transform()
         {}
 
+        const MAT4 Transform::GetTransformMatrix()
+        { 
+            if(m_isDirty)
+            {
+                m_isDirty = false;
+                m_transform = m_translation * m_rotation * m_scale;
+            }
+
+            return m_transform; 
+        }
+
         void Transform::SetParent(Transform& parent)
         {
             worldObj->GetHierarchy().SetNodeOwner(worldNode, parent.worldNode);
+        }
+
+        void Transform::RemoveParent()
+        {
+            auto& hierarchy = worldObj->GetHierarchy();
+            hierarchy.SetNodeOwner(worldNode, hierarchy.GetRoot());
         }
 
         Transform* Transform::GetParent()
@@ -25,7 +45,7 @@ namespace CPGFramework
             Transform* result = nullptr;
             auto& hierarchy = worldObj->GetHierarchy();
             Containers::DataTree::Node owner = hierarchy.GetNodeOwner(worldNode);
-            if(owner.IsValid())
+            if(owner.IsValid() && !owner.IsRoot())
             {
                 World::EntityNode* en = hierarchy.GetData<World::EntityNode>(owner);
                 result = worldObj->GetRegistry().try_get<Transform>(en->id);
@@ -45,8 +65,9 @@ namespace CPGFramework
             return GetTransformMatrix() * glm::inverse(parent->GetTransformMatrix());
         }
 
-        void Transform::Translate(const VEC3& axis, const FLOAT& amount)
+        void Transform::Translate(const VEC3& axis, const FLOAT& amount, const Space& relativeTo)
         {
+
             auto& hierarchy = worldObj->GetHierarchy();
             __INTERNAL__ApplyTranslationToChildrenRecursive(hierarchy, *this, axis * amount);
         }
@@ -65,9 +86,9 @@ namespace CPGFramework
             __INTERNAL__ApplyTranslationToChildrenRecursive(hierarchy, *this, amount);
         }
 
-        void Transform::Rotate(const VEC3& axis, const FLOAT& value)
+        void Transform::Rotate(const VEC3& axis, const FLOAT& angle)
         {
-
+            m_transform = glm::rotate(m_transform, glm::radians(angle), axis);
         }
 
         void Transform::Scale(const VEC3& scale)

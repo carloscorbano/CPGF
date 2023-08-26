@@ -6,6 +6,7 @@ target_sources(cp_engine
         shader.cpp
         texture2D.cpp
         vertex_array.cpp
+        mesh.cpp
     PUBLIC
         glfw.hpp
         window.hpp
@@ -18,6 +19,8 @@ target_sources(cp_engine
         vertex_array.hpp
         vertex_buffer_layout.hpp
         vertex_buffer.hpp
+        vertex.hpp
+        mesh.hpp
 )
 
 find_package(OpenGL REQUIRED)

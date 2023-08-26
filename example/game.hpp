@@ -3,9 +3,7 @@
 #include "cpengine/engine.hpp"
 #include "cpengine/modules/world/entity.hpp"
 
-#include "cpengine/modules/graphics/vertex_array.hpp"
-#include "cpengine/modules/graphics/index_buffer.hpp"
-#include "cpengine/modules/graphics/material.hpp"
+#include "cpengine/modules/graphics/mesh.hpp"
 
 using namespace CPGFramework;
 
@@ -25,8 +23,10 @@ public:
     World::Entity entity;
     World::Entity entity2;
 
-    Graphics::VertexArray* VA;
-    Graphics::VertexBuffer* VB;
-    Graphics::IndexBuffer* IB;
-    Graphics::Material* material;
+    // Graphics::VertexArray* VA;
+    // Graphics::VertexBuffer* VB;
+    // Graphics::IndexBuffer* IB;
+    // Graphics::Material* material;
+
+    Graphics::Mesh* mesh;
 };

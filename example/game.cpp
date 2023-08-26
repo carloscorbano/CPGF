@@ -20,37 +20,53 @@ Game::~Game()
 
 void Game::OnEngineStart()
 {
-    float vertices[] = 
-    {
-        //position                 //color                 //texCoord
-        -0.5f,  -0.5f, 0.0f,       1.0f, 1.0f, 1.0f,       0.0f, 0.0f, //0
-         0.5f,  -0.5f, 0.0f,       1.0f, 1.0f, 1.0f,       1.0f, 0.0f, //1
-        -0.5f,   0.5f, 0.0f,       1.0f, 1.0f, 1.0f,       0.0f, 1.0f, //2
-         0.5f,   0.5f, 0.0f,       1.0f, 1.0f, 1.0f,       1.0f, 1.0f  //3
-    };
-
-    GLuint indices[] = 
-    {
-        0, 2, 1,
-        1, 2, 3
-    };
-
-    material = new Graphics::Material();
-    material->SetShader(GetModules()->resources->Load<Graphics::Shader>("shaders", "simple"));
-    VA = new Graphics::VertexArray();
-    VB = new Graphics::VertexBuffer(vertices, sizeof(vertices));
-    IB = new Graphics::IndexBuffer(indices, 6);
-
-    Graphics::VertexBufferLayout vbl;
-    vbl.Push<GLfloat>(3);
-    vbl.Push<GLfloat>(3);
-    vbl.Push<GLfloat>(2);
-
-    VA->AddBuffer(*VB, vbl);
-
     Graphics::TextureData td(GetModules()->resources->Load<Graphics::Texture2D>("textures", "tex.jpg"));
-    material->Push<GLint>("outTexture", 0);
-    material->Push<Graphics::TextureData>(td.texture->GetFilename(), td);
+
+    mesh = new Graphics::Mesh();
+
+    Graphics::Material& mat = mesh->GetMaterial();
+
+    mat.SetShader(GetModules()->resources->Load<Graphics::Shader>("shaders", "simple"));
+    mat.Push<GLint>("ourTexture", 0);
+    mat.Push<Graphics::TextureData>(td.texture->GetFilename(), td);
+
+    mesh->AddQuad(  Graphics::Vertex({ VEC3(-0.5f, -0.5f, 0.5f), VEC3(1.0f, 1.0f, 1.0f), VEC2(0.0f, 0.0f) }), 
+                    Graphics::Vertex({ VEC3(0.5f, -0.5f, 0.5f), VEC3(1.0f, 1.0f, 1.0f), VEC2(1.0f, 0.0f) }), 
+                    Graphics::Vertex({ VEC3(-0.5f, 0.5f, 0.5f), VEC3(1.0f, 1.0f, 1.0f), VEC2(0.0f, 1.0f) }), 
+                    Graphics::Vertex({ VEC3(0.5f, 0.5f, 0.5f), VEC3(1.0f, 1.0f, 1.0f), VEC2(1.0f, 1.0f) })
+                );
+
+    mesh->AddQuad(  Graphics::Vertex({ VEC3(0.5f, -0.5f, -0.5f), VEC3(1.0f, 1.0f, 1.0f), VEC2(0.0f, 0.0f) }), 
+                    Graphics::Vertex({ VEC3(-0.5f, -0.5f, -0.5f), VEC3(1.0f, 1.0f, 1.0f), VEC2(1.0f, 0.0f) }), 
+                    Graphics::Vertex({ VEC3(0.5f, 0.5f, -0.5f), VEC3(1.0f, 1.0f, 1.0f), VEC2(0.0f, 1.0f) }), 
+                    Graphics::Vertex({ VEC3(-0.5f, 0.5f, -0.5f), VEC3(1.0f, 1.0f, 1.0f), VEC2(1.0f, 1.0f) })
+                );
+
+    mesh->AddQuad(  Graphics::Vertex({ VEC3(0.5f, -0.5f, 0.5f), VEC3(1.0f, 1.0f, 1.0f), VEC2(0.0f, 0.0f) }), 
+                    Graphics::Vertex({ VEC3(0.5f, -0.5f, -0.5f), VEC3(1.0f, 1.0f, 1.0f), VEC2(1.0f, 0.0f) }), 
+                    Graphics::Vertex({ VEC3(0.5f, 0.5f, 0.5f), VEC3(1.0f, 1.0f, 1.0f), VEC2(0.0f, 1.0f) }), 
+                    Graphics::Vertex({ VEC3(0.5f, 0.5f, -0.5f), VEC3(1.0f, 1.0f, 1.0f), VEC2(1.0f, 1.0f) })
+                );
+
+    mesh->AddQuad(  Graphics::Vertex({ VEC3(-0.5f, -0.5f, -0.5f), VEC3(1.0f, 1.0f, 1.0f), VEC2(0.0f, 0.0f) }), 
+                    Graphics::Vertex({ VEC3(-0.5f, -0.5f, 0.5f), VEC3(1.0f, 1.0f, 1.0f), VEC2(1.0f, 0.0f) }), 
+                    Graphics::Vertex({ VEC3(-0.5f, 0.5f, -0.5f), VEC3(1.0f, 1.0f, 1.0f), VEC2(0.0f, 1.0f) }), 
+                    Graphics::Vertex({ VEC3(-0.5f, 0.5f, 0.5f), VEC3(1.0f, 1.0f, 1.0f), VEC2(1.0f, 1.0f) })
+                );
+
+    mesh->AddQuad(  Graphics::Vertex({ VEC3(-0.5f, 0.5f, -0.5f), VEC3(1.0f, 1.0f, 1.0f), VEC2(0.0f, 0.0f) }), 
+                    Graphics::Vertex({ VEC3(-0.5f, 0.5f, 0.5f), VEC3(1.0f, 1.0f, 1.0f), VEC2(1.0f, 0.0f) }), 
+                    Graphics::Vertex({ VEC3(0.5f, 0.5f, -0.5f), VEC3(1.0f, 1.0f, 1.0f), VEC2(0.0f, 1.0f) }), 
+                    Graphics::Vertex({ VEC3(0.5f, 0.5f, 0.5f), VEC3(1.0f, 1.0f, 1.0f), VEC2(1.0f, 1.0f) })
+                );
+
+    mesh->AddQuad(  Graphics::Vertex({ VEC3(-0.5f, -0.5f, 0.5f), VEC3(1.0f, 1.0f, 1.0f), VEC2(0.0f, 0.0f) }), 
+                    Graphics::Vertex({ VEC3(-0.5f, -0.5f, -0.5f), VEC3(1.0f, 1.0f, 1.0f), VEC2(1.0f, 0.0f) }), 
+                    Graphics::Vertex({ VEC3(0.5f, -0.5f, 0.5f), VEC3(1.0f, 1.0f, 1.0f), VEC2(0.0f, 1.0f) }), 
+                    Graphics::Vertex({ VEC3(0.5f, -0.5f, -0.5f), VEC3(1.0f, 1.0f, 1.0f), VEC2(1.0f, 1.0f) })
+                );
+    
+    mesh->Compile();
 
     auto* t0 = entity.AddComponent<Components::Transform>();
     auto* t1 = entity2.AddComponent<Components::Transform>();
@@ -61,27 +77,13 @@ void Game::OnEngineStart()
 
 void Game::OnEngineQuit()
 {
-    delete VA;
-    delete VB;
-    delete IB;
-    delete material;
+    if(mesh) delete mesh;
 }
 
 void Game::Update() 
 {
     if(GetModules()->input->IsKeyHolded(Key::A))
     {
-        // auto* child = entity2.GetComponent<Components::Transform>();
-        // auto* owner = child->GetParent();
-        // auto* root = owner->GetParent();
-        
-        // //child->Translate(VEC3(0,1,0), 2.0f);
-        // owner->Scale(VEC3(1,2,1));
-
-        // DEBUG_LOG("CHILD (WORLD)>>", ToString(child->GetTransformMatrix()));
-        // DEBUG_LOG("OWNER (WORLD)>>", ToString(owner->GetTransformMatrix()));
-        // DEBUG_LOG("CHILD (LOCAL)>>", ToString(child->WorldToLocalTransformMatrix()));
-        // DEBUG_LOG("OWNER (LOCAL)>>", ToString(owner->WorldToLocalTransformMatrix()));
         entity.GetComponent<Components::Transform>()->
             Translate(VEC3(-1,0,0),
             2.0f * GetModules()->gametime->GetDeltaTime());
@@ -95,17 +97,6 @@ void Game::Update()
 
     if(GetModules()->input->IsKeyHolded(Key::W))
     {
-        // auto* child = entity2.GetComponent<Components::Transform>();
-        // auto* owner = child->GetParent();
-        // auto* root = owner->GetParent();
-        
-        // //child->Translate(VEC3(0,1,0), 2.0f);
-        // owner->Scale(VEC3(1,2,1));
-
-        // DEBUG_LOG("CHILD (WORLD)>>", ToString(child->GetTransformMatrix()));
-        // DEBUG_LOG("OWNER (WORLD)>>", ToString(owner->GetTransformMatrix()));
-        // DEBUG_LOG("CHILD (LOCAL)>>", ToString(child->WorldToLocalTransformMatrix()));
-        // DEBUG_LOG("OWNER (LOCAL)>>", ToString(owner->WorldToLocalTransformMatrix()));
         entity.GetComponent<Components::Transform>()->
             Translate(VEC3(0,1,0),
             2.0f * GetModules()->gametime->GetDeltaTime());
@@ -119,12 +110,42 @@ void Game::Update()
 
     if(GetModules()->input->IsKeyHolded(Key::Q))
     {
-        entity.GetComponent<Components::Transform>()->Scale(VEC3(2,2,2));
+        entity.GetComponent<Components::Transform>()->
+            Translate(VEC3(0,0,1),
+            2.0f * GetModules()->gametime->GetDeltaTime());
     }
 
     if(GetModules()->input->IsKeyHolded(Key::E))
     {
-        entity.GetComponent<Components::Transform>()->Scale(VEC3(1,1,1));
+        entity.GetComponent<Components::Transform>()->
+            Translate(VEC3(0,0,-1),
+            2.0f * GetModules()->gametime->GetDeltaTime());
+    }
+
+        if(GetModules()->input->IsKeyHolded(Key::K))
+    {
+        entity.GetComponent<Components::Transform>()->Rotate(VEC3(0,1,0), 
+                120.0f * GetModules()->gametime->GetDeltaTime());
+    }
+
+    if(GetModules()->input->IsKeyHolded(Key::L))
+    {
+        entity.GetComponent<Components::Transform>()->Rotate(VEC3(0,1,0), 
+                -120.0f * GetModules()->gametime->GetDeltaTime());
+    }
+
+    if(GetModules()->input->IsKeyPressed(Key::K))
+    {
+        auto* transform = entity2.GetComponent<Components::Transform>();
+        if(transform->GetParent())
+        {
+            transform->RemoveParent();
+        }
+        else
+        {
+            transform->SetParent(*entity.GetComponent<Components::Transform>());
+        }
+
     }
 
 }
@@ -133,31 +154,30 @@ void Game::LateUpdate() {}
 
 void Game::Draw()
 {
-    if(material->GetShader()->GetResourceState() == Resources::ResourceState::OK)
-    {
-        material->Bind();
-        VA->Bind();
-        IB->Bind();
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
 
-        glEnable(GL_DEPTH_TEST);
-        //glEnable(GL_CULL_FACE);
+    if(mesh)
+    {
+        mesh->Bind();
 
         MAT4 model, view, projection;
         model = view = projection = MAT4_IDENTITY;
-
         view = glm::lookAt(VEC3(0,0,5.0f), VEC3(0,0,0), VEC3(0,1,0));
         projection = glm::perspective(glm::radians(45.0f), (1320.0f / 780.0f), 0.1f, 1000.0f);
-        material->GetShader()->SetUniform<MAT4>("v", view);
-        material->GetShader()->SetUniform<MAT4>("p", projection);
 
-        model = entity.GetComponent<Components::Transform>()->GetTransformMatrix();
-        material->GetShader()->SetUniform<MAT4>("m", model);
+        Graphics::Shader* shader = mesh->GetMaterial().GetShader();
+        shader->SetUniform<MAT4>("view", view);
+        shader->SetUniform<MAT4>("projection", projection);
         
-        glDrawElements(GL_TRIANGLES, IB->GetCount(), GL_UNSIGNED_INT, 0);
+        model = entity.GetComponent<Components::Transform>()->GetTransformMatrix();
+        shader->SetUniform<MAT4>("model", model);
+        mesh->Draw(true);
 
         model = entity2.GetComponent<Components::Transform>()->GetTransformMatrix();
-        material->GetShader()->SetUniform<MAT4>("m", model);
-
-        glDrawElements(GL_TRIANGLES, IB->GetCount(), GL_UNSIGNED_INT, 0);
+        shader->SetUniform<MAT4>("model", model);
+        mesh->Draw();
     }
 }

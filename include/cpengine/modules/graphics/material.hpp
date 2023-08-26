@@ -88,7 +88,223 @@ namespace CPGFramework
             void SetShader(Shader* shader);
             Shader* GetShader();
 
-            void Bind() const;
+            template<typename T>
+            T* GetAttribute(const STRING& name)
+            {
+                ASSERT(false);
+            }
+
+            template<typename T>
+            std::vector<MaterialAttribute*> GetAllAttributesOfType()
+            {
+                ASSERT(false);
+            }
+
+            template<>
+            std::vector<MaterialAttribute*> GetAllAttributesOfType<FLOAT>()
+            {
+                std::vector<MaterialAttribute*> result;
+                for(MaterialAttribute& atr : m_attributes)
+                {
+                    if(atr.type == AttributeType::FLOAT)
+                    {
+                        result.push_back(&atr);
+                    }
+                }
+
+                return result;
+            }
+
+            template<>
+            FLOAT* GetAttribute<FLOAT>(const STRING& name)
+            {
+                for(MaterialAttribute& atr : m_attributes)
+                {
+                    if(atr.name == name && atr.type == AttributeType::FLOAT)
+                    {
+                        return std::any_cast<FLOAT*>(atr.value);
+                    }
+                }
+
+                return nullptr;
+            }
+
+            template<>
+            std::vector<MaterialAttribute*> GetAllAttributesOfType<i32>()
+            {
+                std::vector<MaterialAttribute*> result;
+                for(MaterialAttribute& atr : m_attributes)
+                {
+                    if(atr.type == AttributeType::I32)
+                    {
+                        result.push_back(&atr);
+                    }
+                }
+                
+                return result;
+            }
+
+            template<>
+            i32* GetAttribute<i32>(const STRING& name)
+            {
+                for(MaterialAttribute& atr : m_attributes)
+                {
+                    if(atr.name == name && atr.type == AttributeType::I32)
+                    {
+                        return std::any_cast<i32*>(atr.value);
+                    }
+                }
+
+                return nullptr;
+            }
+
+            template<>
+            std::vector<MaterialAttribute*> GetAllAttributesOfType<VEC2>()
+            {
+                std::vector<MaterialAttribute*> result;
+                for(MaterialAttribute& atr : m_attributes)
+                {
+                    if(atr.type == AttributeType::VEC2)
+                    {
+                        result.push_back(&atr);
+                    }
+                }
+                
+                return result;
+            }
+
+            template<>
+            VEC2* GetAttribute<VEC2>(const STRING& name)
+            {
+                for(MaterialAttribute& atr : m_attributes)
+                {
+                    if(atr.name == name && atr.type == AttributeType::VEC2)
+                    {
+                        return std::any_cast<VEC2*>(atr.value);
+                    }
+                }
+
+                return nullptr;
+            }
+
+            template<>
+            std::vector<MaterialAttribute*> GetAllAttributesOfType<VEC3>()
+            {
+                std::vector<MaterialAttribute*> result;
+                for(MaterialAttribute& atr : m_attributes)
+                {
+                    if(atr.type == AttributeType::VEC3)
+                    {
+                        result.push_back(&atr);
+                    }
+                }
+                
+                return result;
+            }
+
+            template<>
+            VEC3* GetAttribute<VEC3>(const STRING& name)
+            {
+                for(MaterialAttribute& atr : m_attributes)
+                {
+                    if(atr.name == name && atr.type == AttributeType::VEC3)
+                    {
+                        return std::any_cast<VEC3*>(atr.value);
+                    }
+                }
+
+                return nullptr;
+            }
+
+            template<>
+            std::vector<MaterialAttribute*> GetAllAttributesOfType<VEC4>()
+            {
+                std::vector<MaterialAttribute*> result;
+                for(MaterialAttribute& atr : m_attributes)
+                {
+                    if(atr.type == AttributeType::VEC4)
+                    {
+                        result.push_back(&atr);
+                    }
+                }
+                
+                return result;
+            }
+
+            template<>
+            VEC4* GetAttribute<VEC4>(const STRING& name)
+            {
+                for(MaterialAttribute& atr : m_attributes)
+                {
+                    if(atr.name == name && atr.type == AttributeType::VEC4)
+                    {
+                        return std::any_cast<VEC4*>(atr.value);
+                    }
+                }
+
+                return nullptr;
+            }
+
+            template<>
+            std::vector<MaterialAttribute*> GetAllAttributesOfType<MAT4>()
+            {
+                std::vector<MaterialAttribute*> result;
+                for(MaterialAttribute& atr : m_attributes)
+                {
+                    if(atr.type == AttributeType::MAT4)
+                    {
+                        result.push_back(&atr);
+                    }
+                }
+                
+                return result;
+            }
+
+            template<>
+            MAT4* GetAttribute<MAT4>(const STRING& name)
+            {
+                for(MaterialAttribute& atr : m_attributes)
+                {
+                    if(atr.name == name && atr.type == AttributeType::MAT4)
+                    {
+                        return std::any_cast<MAT4*>(atr.value);
+                    }
+                }
+
+                return nullptr;
+            }
+
+            template<>
+            std::vector<MaterialAttribute*> GetAllAttributesOfType<TextureData>()
+            {
+                std::vector<MaterialAttribute*> result;
+                for(MaterialAttribute& atr : m_attributes)
+                {
+                    if(atr.type == AttributeType::TEX2D)
+                    {
+                        result.push_back(&atr);
+                    }
+                }
+                
+                return result;
+            }
+
+            template<>
+            TextureData* GetAttribute<TextureData>(const STRING& name)
+            {
+                for(MaterialAttribute& atr : m_attributes)
+                {
+                    if(atr.name == name && atr.type == AttributeType::TEX2D)
+                    {
+                        return std::any_cast<TextureData*>(atr.value);
+                    }
+                }
+
+                return nullptr;
+            }
+
+
+            BOOL Bind() const;
         private:
             std::vector<MaterialAttribute> m_attributes;
             Shader* m_shader;

@@ -53,6 +53,7 @@ namespace CPGFramework
 
                 const i32 GetIndex() const { return index; }
                 const BOOL IsValid() const { return index != -1; }
+                const BOOL IsRoot() const { return index == 0; }
             private:
                 i32 index;
             };
@@ -114,6 +115,7 @@ namespace CPGFramework
             void FreeNode(const Node& node) 
             {
                 if(!node.IsValid()) throw std::runtime_error("INVALID NODE INDEX!");
+                if(node.IsRoot()) return;
                 __INTERNAL__FreeNode(node.index);
             }
 
