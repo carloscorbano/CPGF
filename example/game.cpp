@@ -82,59 +82,86 @@ void Game::OnEngineQuit()
 
 void Game::Update() 
 {
+    Components::Transform* entityTransform = entity.GetComponent<Components::Transform>();
+    const DOUBLE deltaTime = GetModules()->gametime->GetDeltaTime();
+
+    if(!entityTransform) return;
+
+    if(GetModules()->input->IsKeyPressed(Key::T))
+    {
+        curSpace = curSpace == Space::LOCAL ? Space::WORLD : Space::LOCAL;
+        DEBUG_LOG("CHANGED CUR SPACE TO", curSpace == Space::LOCAL ? "LOCAL" : "WORLD");
+    }
+
     if(GetModules()->input->IsKeyHolded(Key::A))
     {
-        entity.GetComponent<Components::Transform>()->
+        entityTransform->
             Translate(VEC3(-1,0,0),
-            2.0f * GetModules()->gametime->GetDeltaTime());
+            2.0f * deltaTime, 
+            curSpace);
     }
     else if(GetModules()->input->IsKeyHolded(Key::D))
     {
-        entity.GetComponent<Components::Transform>()->
+        entityTransform->
             Translate(VEC3(1,0,0),
-            2.0f * GetModules()->gametime->GetDeltaTime());
+            2.0f * deltaTime,
+            curSpace);
     }
-
+    
     if(GetModules()->input->IsKeyHolded(Key::W))
     {
-        entity.GetComponent<Components::Transform>()->
-            Translate(VEC3(0,1,0),
-            2.0f * GetModules()->gametime->GetDeltaTime());
+        // entityTransform->
+        //     Translate(VEC3(0,1,0),
+        //     2.0f * deltaTime,
+        //     curSpace);
+        entityTransform->Translate(entityTransform->GetUpVector(), 2.0f * deltaTime);
     }
     else if(GetModules()->input->IsKeyHolded(Key::S))
     {
-        entity.GetComponent<Components::Transform>()->
-            Translate(VEC3(0,-1,0),
-            2.0f * GetModules()->gametime->GetDeltaTime());
+        // entityTransform->
+        //     Translate(VEC3(0,-1,0),
+        //     2.0f * deltaTime,
+        //     curSpace);
+
+        entityTransform->Translate(entityTransform->GetUpVector(), -2.0f * deltaTime);
     }
 
-    if(GetModules()->input->IsKeyHolded(Key::Q))
+    if(GetModules()->input->IsKeyHolded(Key::X))
     {
-        entity.GetComponent<Components::Transform>()->
-            Translate(VEC3(0,0,1),
-            2.0f * GetModules()->gametime->GetDeltaTime());
+        entityTransform->
+            Translate(VEC3_ZERO);
     }
 
-    if(GetModules()->input->IsKeyHolded(Key::E))
-    {
-        entity.GetComponent<Components::Transform>()->
-            Translate(VEC3(0,0,-1),
-            2.0f * GetModules()->gametime->GetDeltaTime());
-    }
+    // if(GetModules()->input->IsKeyHolded(Key::Q))
+    // {
+    //     entityTransform->
+    //         Translate(VEC3(0,0,1),
+    //         2.0f * deltaTime);
+    // }
 
-        if(GetModules()->input->IsKeyHolded(Key::K))
+    // if(GetModules()->input->IsKeyHolded(Key::E))
+    // {
+    //     entityTransform->
+    //         Translate(VEC3(0,0,-1),
+    //         2.0f * deltaTime);
+    // }
+
+    if(GetModules()->input->IsKeyHolded(Key::K))
     {
-        entity.GetComponent<Components::Transform>()->Rotate(VEC3(0,1,0), 
-                120.0f * GetModules()->gametime->GetDeltaTime());
+        entityTransform->Rotate(VEC3(0,1,0), 
+                120.0f * deltaTime);
+        // DEBUG_LOG("ROTATION", ToString(RadToDeg(entityTransform->GetEulerRotation())));
+        
     }
 
     if(GetModules()->input->IsKeyHolded(Key::L))
     {
-        entity.GetComponent<Components::Transform>()->Rotate(VEC3(0,1,0), 
-                -120.0f * GetModules()->gametime->GetDeltaTime());
+        entityTransform->Rotate(VEC3(0,1,0), 
+                -120.0f * deltaTime);
+        DEBUG_LOG("ROTATION", ToString(entityTransform->GetEulerRotation()));
     }
 
-    if(GetModules()->input->IsKeyPressed(Key::K))
+    if(GetModules()->input->IsKeyPressed(Key::Y))
     {
         auto* transform = entity2.GetComponent<Components::Transform>();
         if(transform->GetParent())

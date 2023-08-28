@@ -23,10 +23,6 @@ public:
     World::Entity entity;
     World::Entity entity2;
 
-    // Graphics::VertexArray* VA;
-    // Graphics::VertexBuffer* VB;
-    // Graphics::IndexBuffer* IB;
-    // Graphics::Material* material;
-
     Graphics::Mesh* mesh;
+    Space curSpace = Space::LOCAL;
 };

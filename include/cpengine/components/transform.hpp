@@ -4,16 +4,11 @@
 #include "../containers/data_tree.hpp"
 #include <functional>
 
-#define WORLD_UP        VEC3(0.0f, 1.0f, 0.0f)
-#define WORLD_RIGHT     VEC3(1.0f, 0.0f, 0.0f)
-#define WORLD_FORWARD   VEC3(0.0f, 0.0f, 1.0f)
-
 namespace CPGFramework
 {
     namespace World { class WorldClass; }
     namespace Components
     {
-        enum class Space { LOCAL, WORLD };
         class Transform
         {
         public:
@@ -42,11 +37,21 @@ namespace CPGFramework
             /// @brief Set the translation to the given value (it'll replace the current translation to the given value)
             /// @param value 
             void Translate(const VEC3& value);
+            void TranslateTowards(const VEC3& target, const FLOAT& amount);
 
             void Rotate(const VEC3& axis, const FLOAT& angle);
+            
             /// @brief Set the transform scale.
             /// @param scale 
             void Scale(const VEC3& scale);
+
+            const VEC3 GetPosition();
+            const VEC3 GetEulerRotation();
+            const VEC3 GetScale();
+            
+            const VEC3 GetUpVector();
+            const VEC3 GetRightVector();
+            const VEC3 GetForwardVector();
 
         private:
             void __INTERNAL__ApplyTranslationToChildrenRecursive(Containers::DataTree& hierarchy, Transform& current, const VEC3& value);
@@ -56,7 +61,7 @@ namespace CPGFramework
             Containers::DataTree::Node worldNode;
             
             MAT4 m_translation;
-            MAT4 m_rotation;
+            QUAT m_rotation;
             MAT4 m_scale;
             BOOL m_isDirty;
 

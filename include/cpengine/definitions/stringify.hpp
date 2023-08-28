@@ -2,6 +2,7 @@
 
 #include <sstream>
 #include "typedefs.hpp"
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/matrix_decompose.hpp>
 
 struct DecomposedMAT4
@@ -16,6 +17,7 @@ struct DecomposedMAT4
     DecomposedMAT4(const MAT4& matrix)
     {
         success = glm::decompose(matrix, scale, orientation, translation, skew, perspective);
+        orientation = glm::conjugate(orientation);
     }
 };
 

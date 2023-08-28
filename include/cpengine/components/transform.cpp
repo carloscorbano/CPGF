@@ -3,14 +3,16 @@
 #include "../modules/world/entity_node.hpp"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/euler_angles.hpp>
 #include "../definitions/stringify.hpp"
+
 namespace CPGFramework
 {
     namespace Components
     {
         Transform::Transform()
             :   worldObj(nullptr), m_transform(MAT4_IDENTITY), m_translation(MAT4_IDENTITY),
-                m_rotation(MAT4_IDENTITY), m_scale(MAT4_IDENTITY), m_isDirty(true)
+                m_rotation(QUAT(VEC3_ZERO)), m_scale(MAT4_IDENTITY), m_isDirty(true)
         {
             GetTransformMatrix();
         }
@@ -23,7 +25,7 @@ namespace CPGFramework
             if(m_isDirty)
             {
                 m_isDirty = false;
-                m_transform = m_translation * m_rotation * m_scale;
+                m_transform = m_translation * glm::toMat4(m_rotation) * m_scale;
             }
 
             return m_transform; 
@@ -67,16 +69,35 @@ namespace CPGFramework
 
         void Transform::Translate(const VEC3& axis, const FLOAT& amount, const Space& relativeTo)
         {
+            VEC3 result = VEC3_ZERO;
+            switch (relativeTo)
+            {
+            case Space::LOCAL:
+            {
+                result = (m_rotation * axis) * amount;
+            } break;
+            case Space::WORLD:
+            {
+                result = axis * amount;
+            } break;
+            default: break;
+            }
 
             auto& hierarchy = worldObj->GetHierarchy();
-            __INTERNAL__ApplyTranslationToChildrenRecursive(hierarchy, *this, axis * amount);
+            __INTERNAL__ApplyTranslationToChildrenRecursive(hierarchy, *this, result);
+        }
+
+        void Transform::TranslateTowards(const VEC3& target, const FLOAT& amount)
+        {
+            VEC4 translation = m_translation[3];
+
         }
 
         void Transform::Translate(const VEC3& value)
         {
             MAT4 result = MAT4_IDENTITY;
             result = glm::translate(result, value);
-            MAT4 delta = result * glm::inverse(m_transform);
+            MAT4 delta = result * glm::inverse(m_translation);
             VEC3 amount{};
             amount.x = delta[3].x;
             amount.y = delta[3].y;
@@ -88,7 +109,8 @@ namespace CPGFramework
 
         void Transform::Rotate(const VEC3& axis, const FLOAT& angle)
         {
-            m_transform = glm::rotate(m_transform, glm::radians(angle), axis);
+            m_rotation = glm::rotate(m_rotation, glm::radians(angle), axis);
+            m_isDirty = true;
         }
 
         void Transform::Scale(const VEC3& scale)
@@ -98,9 +120,41 @@ namespace CPGFramework
             __INTERNAL__ApplyScaleToChildrenRecursive(hierarchy, *this, scale);
         }
 
+        const VEC3 Transform::GetPosition()
+        {
+            return m_translation[3];
+        }
+
+        const VEC3 Transform::GetEulerRotation()
+        {
+            return VEC3();
+        }
+
+        const VEC3 Transform::GetScale()
+        {
+            return VEC3(glm::length(VEC3(m_scale[0])), glm::length(VEC3(m_scale[1])), glm::length(VEC3(m_scale[2])));
+        }
+
+        const VEC3 Transform::GetUpVector()
+        {
+            return m_rotation * VEC3_UP;
+        }
+
+        const VEC3 Transform::GetRightVector()
+        {
+            return m_rotation * VEC3_RIGHT;
+        }
+
+        const VEC3 Transform::GetForwardVector()
+        {
+            return m_rotation * VEC3_FORWARD;
+        }
+
         void Transform::__INTERNAL__ApplyTranslationToChildrenRecursive(Containers::DataTree& hierarchy, Transform& current, const VEC3& value)
         {
-            current.m_transform = glm::translate(current.m_transform, value);
+            current.m_isDirty = true;
+            current.m_translation = glm::translate(current.m_translation, value);
+
             hierarchy.ViewChildren<World::EntityNode>(current.worldNode, 
             [&](Containers::DataTree& tree, Containers::DataTree::Node& node, World::EntityNode& en)
             {

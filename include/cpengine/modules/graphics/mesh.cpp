@@ -15,27 +15,55 @@ namespace CPGFramework
 
         void Mesh::AddTriangle(const Vertex& v0, const Vertex& v1, const Vertex& v2)
         {
-            m_indices.push_back(m_vertices.size());
+            GLuint i0, i1, i2;
+
+            i0 = m_vertices.size();
             m_vertices.push_back(v0);
 
-            m_indices.push_back(m_vertices.size());
+            i1 = m_vertices.size();
             m_vertices.push_back(v1);
 
-            m_indices.push_back(m_vertices.size());
+            i2 = m_vertices.size();
             m_vertices.push_back(v2);
+
+            m_indices.push_back(i0);
+            m_indices.push_back(i1);
+            m_indices.push_back(i2);
         }
 
         void Mesh::AddQuad(const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3)
         {
-            AddTriangle(v0, v1, v2);
-            AddTriangle(v1, v3, v2);
+            GLuint i0, i1, i2, i3;
+
+            i0 = m_vertices.size();
+            m_vertices.push_back(v0);
+
+            i1 = m_vertices.size();
+            m_vertices.push_back(v1);
+
+            i2 = m_vertices.size();
+            m_vertices.push_back(v2);
+
+            i3 = m_vertices.size();
+            m_vertices.push_back(v3);
+
+            m_indices.push_back(i0);
+            m_indices.push_back(i1);
+            m_indices.push_back(i2);
+
+            m_indices.push_back(i1);
+            m_indices.push_back(i3);
+            m_indices.push_back(i2);
         }
 
         void Mesh::Compile()
         {
-            m_compiled = false;
-            DeleteBuffers();
-
+            if(m_compiled)
+            {
+                m_compiled = false;
+                DeleteBuffers();
+            }
+            
             m_va = new VertexArray();
             m_vb = new VertexBuffer(m_vertices.data(), m_vertices.size() * sizeof(Vertex));
             m_ib = new IndexBuffer(m_indices.data(), m_indices.size());
