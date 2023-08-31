@@ -1,6 +1,7 @@
 #pragma once
 
 #include "definitions/typedefs.hpp"
+#include "definitions/thread.hpp"
 #include "modules/module_container.hpp"
 #include "modules/time/timed_action.hpp"
 

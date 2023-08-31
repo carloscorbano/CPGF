@@ -1,45 +1,65 @@
 #include "transform.hpp"
+#include "../definitions/stringify.hpp"
+#include "../definitions/constants.hpp"
+#include "../definitions/mat4.hpp"
+#include "../definitions/math.hpp"
+
+#include "../debug/debug.hpp"
+
 #include "../modules/world/world.hpp"
 #include "../modules/world/entity_node.hpp"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/euler_angles.hpp>
-#include "../definitions/stringify.hpp"
 
 namespace CPGFramework
 {
     namespace Components
     {
         Transform::Transform()
-            :   worldObj(nullptr), m_transform(MAT4_IDENTITY), m_translation(MAT4_IDENTITY),
-                m_rotation(QUAT(VEC3_ZERO)), m_scale(MAT4_IDENTITY), m_isDirty(true)
-        {
-            GetTransformMatrix();
-        }
+            :   worldObj(nullptr), toRootMatrix(nullptr), toWorldMatrix(MAT4_IDENTITY), localMatrix(MAT4_IDENTITY),
+                localPosition(MAT4_IDENTITY), localRotation(QUAT(VEC3(0))), localScale(MAT4_IDENTITY)
+        {}
 
         Transform::~Transform()
         {}
 
-        const MAT4 Transform::GetTransformMatrix()
-        { 
-            if(m_isDirty)
+        void Transform::SetParent(Transform* parent)
+        {
+            Transform* target = parent;
+            if(target == this) return;
+
+            if(parent)
             {
-                m_isDirty = false;
-                m_transform = m_translation * glm::toMat4(m_rotation) * m_scale;
+                worldObj->GetHierarchy().SetNodeOwner(worldNode, parent->worldNode);
+            }
+            else
+            {
+                auto& hierarchy = worldObj->GetHierarchy();
+                hierarchy.SetNodeOwner(worldNode, hierarchy.GetRoot());
+
+                auto* nodeData = hierarchy.GetData<World::EntityNode>(hierarchy.GetRoot());
+                auto& transform = worldObj->GetRegistry().get<Transform>(nodeData->id);
+                target = &transform;
             }
 
-            return m_transform; 
-        }
+            //apply to local matrix, to keep the changes from the parent.
+            DecomposedMAT4 oldMat(GetWorldMatrix());
+            Translate(oldMat.position);
+            localRotation = oldMat.rotation;
+            Scale(oldMat.scale);
+            __INTERNAL__UpdateLocalMatrix();
 
-        void Transform::SetParent(Transform& parent)
-        {
-            worldObj->GetHierarchy().SetNodeOwner(worldNode, parent.worldNode);
-        }
+            //set the new root matrix
+            toRootMatrix = &target->toWorldMatrix;
 
-        void Transform::RemoveParent()
-        {
-            auto& hierarchy = worldObj->GetHierarchy();
-            hierarchy.SetNodeOwner(worldNode, hierarchy.GetRoot());
+            //apply the inverse of the new root matrix, to keep position, rotate and scale.
+            MAT4 result = glm::inverse(*toRootMatrix) * localMatrix;
+            DecomposedMAT4 resultDec(result);
+            Translate(resultDec.position);
+            localRotation = resultDec.rotation;
+            Scale(resultDec.scale);
+            __INTERNAL__UpdateLocalMatrix();
         }
 
         Transform* Transform::GetParent()
@@ -56,136 +76,107 @@ namespace CPGFramework
             return result;
         }
 
-        const MAT4 Transform::WorldToLocalTransformMatrix()
+        const MAT4 Transform::GetWorldMatrix()
         {
-            Transform* parent = GetParent();
-            if(!parent)
+            toWorldMatrix = MAT4_IDENTITY;
+
+            if(toRootMatrix)
             {
-                return GetTransformMatrix();
+                toWorldMatrix = (*toRootMatrix) * localMatrix;
             }
 
-            return GetTransformMatrix() * glm::inverse(parent->GetTransformMatrix());
+            return toWorldMatrix;
+        }
+
+        void Transform::Translate(const VEC3& newPosition)
+        {
+            localPosition = glm::translate(MAT4_IDENTITY, newPosition);
+            __INTERNAL__UpdateLocalMatrix();
         }
 
         void Transform::Translate(const VEC3& axis, const FLOAT& amount, const Space& relativeTo)
         {
-            VEC3 result = VEC3_ZERO;
+            VEC3 resultAxis = VEC3_ZERO;
             switch (relativeTo)
             {
-            case Space::LOCAL:
-            {
-                result = (m_rotation * axis) * amount;
-            } break;
-            case Space::WORLD:
-            {
-                result = axis * amount;
-            } break;
-            default: break;
+            case Space::WORLD:  resultAxis = glm::normalize(axis);                  break;
+            case Space::LOCAL:  resultAxis = localRotation * glm::normalize(axis);  break;
             }
 
-            auto& hierarchy = worldObj->GetHierarchy();
-            __INTERNAL__ApplyTranslationToChildrenRecursive(hierarchy, *this, result);
+            localPosition = glm::translate(localPosition, amount * resultAxis);
+            __INTERNAL__UpdateLocalMatrix();
         }
 
-        void Transform::TranslateTowards(const VEC3& target, const FLOAT& amount)
+        void Transform::Rotate(const VEC3& axis, const FLOAT& angle, const Space& relativeTo)
         {
-            VEC4 translation = m_translation[3];
+            VEC3 resultAxis = VEC3_ZERO;
+            switch (relativeTo)
+            {
+            case Space::LOCAL:  resultAxis = glm::normalize(axis);                                  break;
+            case Space::WORLD:  resultAxis = glm::inverse(localRotation) * glm::normalize(axis);    break;
+            }
 
+            localRotation = glm::rotate(localRotation, DegToRad(angle), resultAxis);
+            __INTERNAL__UpdateLocalMatrix();
         }
 
-        void Transform::Translate(const VEC3& value)
+        void Transform::Rotate(const VEC3& rotation)
         {
-            MAT4 result = MAT4_IDENTITY;
-            result = glm::translate(result, value);
-            MAT4 delta = result * glm::inverse(m_translation);
-            VEC3 amount{};
-            amount.x = delta[3].x;
-            amount.y = delta[3].y;
-            amount.z = delta[3].z;
-
-            auto& hierarchy = worldObj->GetHierarchy();
-            __INTERNAL__ApplyTranslationToChildrenRecursive(hierarchy, *this, amount);
-        }
-
-        void Transform::Rotate(const VEC3& axis, const FLOAT& angle)
-        {
-            m_rotation = glm::rotate(m_rotation, glm::radians(angle), axis);
-            m_isDirty = true;
+            localRotation = QUAT(rotation);
+            __INTERNAL__UpdateLocalMatrix();
         }
 
         void Transform::Scale(const VEC3& scale)
         {
-            //TODO: make scale in children move it from the owner.
-            auto& hierarchy = worldObj->GetHierarchy();
-            __INTERNAL__ApplyScaleToChildrenRecursive(hierarchy, *this, scale);
+            localScale = glm::scale(MAT4_IDENTITY, scale);
+            __INTERNAL__UpdateLocalMatrix();
         }
 
-        const VEC3 Transform::GetPosition()
+        const VEC3 Transform::GetLocalPosition() const
         {
-            return m_translation[3];
+            return localMatrix[3];
         }
 
-        const VEC3 Transform::GetEulerRotation()
+        const VEC3 Transform::GetWorldPosition() const
         {
-            return VEC3();
+            return toWorldMatrix[3];
         }
 
-        const VEC3 Transform::GetScale()
+        const QUAT Transform::GetLocalRotation() const
         {
-            return VEC3(glm::length(VEC3(m_scale[0])), glm::length(VEC3(m_scale[1])), glm::length(VEC3(m_scale[2])));
+            return localRotation;
         }
 
-        const VEC3 Transform::GetUpVector()
+        const QUAT Transform::GetWorldRotation() const
         {
-            return m_rotation * VEC3_UP;
+            return glm::quat_cast(toWorldMatrix);
         }
 
-        const VEC3 Transform::GetRightVector()
+        const VEC3 Transform::GetScale() const
         {
-            return m_rotation * VEC3_RIGHT;
+            return VEC3(
+                glm::length(VEC3(localMatrix[0])), 
+                glm::length(VEC3(localMatrix[1])), 
+                glm::length(VEC3(localMatrix[2]))
+                );
         }
 
-        const VEC3 Transform::GetForwardVector()
+        const VEC3 Transform::GetRightVector() const
         {
-            return m_rotation * VEC3_FORWARD;
+            return localRotation * VEC3_RIGHT;
+        }
+        const VEC3 Transform::GetUpVector() const
+        {
+            return localRotation * VEC3_UP;
+        }
+        const VEC3 Transform::GetForwardVector() const
+        {
+            return localRotation * VEC3_FORWARD;
         }
 
-        void Transform::__INTERNAL__ApplyTranslationToChildrenRecursive(Containers::DataTree& hierarchy, Transform& current, const VEC3& value)
+        void Transform::__INTERNAL__UpdateLocalMatrix()
         {
-            current.m_isDirty = true;
-            current.m_translation = glm::translate(current.m_translation, value);
-
-            hierarchy.ViewChildren<World::EntityNode>(current.worldNode, 
-            [&](Containers::DataTree& tree, Containers::DataTree::Node& node, World::EntityNode& en)
-            {
-                Transform* next = worldObj->GetRegistry().try_get<Transform>(en.id);
-                if(next)
-                {
-                    __INTERNAL__ApplyTranslationToChildrenRecursive(hierarchy, *next, value);
-                }
-                return true;
-            });
-        }
-
-        void Transform::__INTERNAL__ApplyScaleToChildrenRecursive(Containers::DataTree& hierarchy, Transform& current, const VEC3& value)
-        {
-            DecomposedMAT4 decomposed(current.GetTransformMatrix());
-            MAT4 translation = glm::translate(MAT4_IDENTITY, decomposed.translation);
-            MAT4 rotation = glm::toMat4(decomposed.orientation);
-            MAT4 scale = glm::scale(MAT4_IDENTITY, value);
-
-            current.m_transform = translation * rotation * scale;
-
-            hierarchy.ViewChildren<World::EntityNode>(current.worldNode, 
-            [&](Containers::DataTree& tree, Containers::DataTree::Node& node, World::EntityNode& en)
-            {
-                Transform* next = worldObj->GetRegistry().try_get<Transform>(en.id);
-                if(next)
-                {
-                    __INTERNAL__ApplyScaleToChildrenRecursive(hierarchy, *next, value);
-                }
-                return true;
-            });
+            localMatrix = localPosition * glm::toMat4(localRotation) * localScale;
         }
     } // namespace Components
 } // namespace CPGFramework

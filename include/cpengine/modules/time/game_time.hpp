@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../definitions/typedefs.hpp"
+#include "../../definitions/default.hpp"
 #include "../iengine_module.hpp"
 
 #include <chrono>

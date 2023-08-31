@@ -47,12 +47,12 @@ namespace CPGFramework
             /// @param ...args construction arguments (the relativePath and filename will be passed as well to the object creation.)
             /// @return The created or the loaded file.
             template<typename T, typename... TArgs>
-            T* Load(const STRING& relativePath, const STRING& filename, TArgs... args) 
+            T* Load(const STRING& relativePath, const STRING& filename, TArgs&&... args) 
             {
                 DEBUG_LOG("Load resource requested, path: ", relativePath, " - filename: ", filename);
                 NODE directory = __INTERNAL__GetDirectory(relativePath);
                 NODE fileNode = __INTERNAL__GetFile(directory, filename);
-                return __INTERNAL__GetOrCreateFileData<T>(fileNode, relativePath, filename, args...);
+                return __INTERNAL__GetOrCreateFileData<T>(fileNode, relativePath, filename, std::forward<TArgs>(args)...);
             }
 
             /// @brief Retrieves a loaded resource from the tree. (It'll not create a new one).
@@ -124,7 +124,7 @@ namespace CPGFramework
             NODE __INTERNAL__CreateFileNode(const NODE& directory, const STRING& filename);
 
             template<typename T, typename... TArgs>
-            T* __INTERNAL__GetOrCreateFileData(NODE& fileNode, TArgs... args) 
+            T* __INTERNAL__GetOrCreateFileData(NODE& fileNode, TArgs&&... args) 
             {
                 _INTERNAL_File* fileContent = m_resTree.GetData<_INTERNAL_File>(fileNode);
 
@@ -141,7 +141,7 @@ namespace CPGFramework
                 } 
                 else 
                 {
-                    fileContent->resource = new T(&GetEngineRef(), args...);
+                    fileContent->resource = new T(&GetEngineRef(), std::forward<TArgs>(args)...);
                     fileContent->usage_count = 1;
                     DEBUG_SUCCESS("Created resource file name ", fileContent->filename, ", starting to run data creation pipeline.");
                 }

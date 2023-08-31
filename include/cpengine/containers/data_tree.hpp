@@ -133,11 +133,11 @@ namespace CPGFramework
             /// @param ...args Construction arguments.
             /// @return A pointer to the created data.
             template<typename T, typename... Args>
-            T* CreateData(const Node& node, Args... args) 
+            T* CreateData(const Node& node, Args&&... args) 
             {
                 if(!node.IsValid()) throw std::runtime_error("INVALID NODE INDEX!");
                 __INTERNAL__CleanNodeData(node.index);
-                return __INTERNAL__CreateData<T>(node.index, args...);
+                return __INTERNAL__CreateData<T>(node.index, std::forward<Args>(args)...);
             }
 
             /// @brief Retrieves the data from the given node.
@@ -236,9 +236,9 @@ namespace CPGFramework
             /// @param ...args construction arguments.
             /// @return The ptr to the created data.
             template<typename T, typename... Args>
-            T* __INTERNAL__CreateData(const i32& index, Args... args) 
+            T* __INTERNAL__CreateData(const i32& index, Args&&... args) 
             {
-                m_nodes[index].container = new T(args...);
+                m_nodes[index].container = new T(std::forward<Args>(args)...);
                 return reinterpret_cast<T*>(m_nodes[index].container);
             }
 

@@ -1,11 +1,10 @@
 #pragma once
 
 #include "../../definitions/typedefs.hpp"
+#include "../../definitions/thread.hpp"
 #include "../../containers/object_pool.hpp"
 #include <functional>
 #include <queue>
-
-#define MINIMAL_AMOUNT_OF_CORES 4
 
 namespace CPGFramework
 {
@@ -60,11 +59,11 @@ namespace CPGFramework
             /// @param ...args Construction arguments values.
             /// @return The pointer to the allocated data.
             template<typename T, typename... TArgs>
-            T* BindData(TArgs... args) 
+            T* BindData(TArgs&&... args) 
             {
                 if(m_pv.Data()->opData == nullptr) 
                 {
-                    m_pv.Data()->opData = new T(args...);
+                    m_pv.Data()->opData = new T(std::forward<TArgs>(args)...);
                 }
 
                 return reinterpret_cast<T*>(m_pv.Data()->opData);

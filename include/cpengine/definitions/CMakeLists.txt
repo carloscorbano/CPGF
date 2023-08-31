@@ -3,6 +3,12 @@ target_sources(cp_engine
         typedefs.hpp
         dll.hpp
         stringify.hpp
+        math.hpp
+        thread.hpp
+        constants.hpp
+        default.hpp
+        space.hpp
+        mat4.hpp
 )
 
 target_include_directories(cp_engine 

@@ -24,6 +24,7 @@ namespace CPGFramework
             EntityNode* data = m_hierarchy.CreateData<EntityNode>(rootNode);
             data->id = m_registry.create();
             auto& transform = m_registry.emplace<Components::Transform>(data->id);
+            transform.worldObj = this;
             transform.worldNode = rootNode;
         }
 
@@ -106,7 +107,7 @@ namespace CPGFramework
                     auto* transform = m_registry.try_get<Components::Transform>(e);
                     if(transform && !m_hierarchy.HasOwner(transform->worldNode))
                     {
-                        m_hierarchy.SetNodeOwner(transform->worldNode, m_hierarchy.GetRoot());
+                        transform->SetParent(nullptr);
                     }
                 }
             }

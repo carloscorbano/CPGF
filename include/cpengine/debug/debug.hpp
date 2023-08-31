@@ -39,12 +39,12 @@ namespace CPGFramework
             
             /// @brief Submit the debug data into the container and print to the screen.
             template<typename... Args>
-            void Submit(const DebugType& type, Args... args) 
+            void Submit(const DebugType& type, Args&&... args) 
             {
                 std::lock_guard<std::mutex> lock(m);
 
                 std::ostringstream o;
-                __INTERNAL__ConcatArgs(o, __INTERNAL__getFormattedTime(), args...);
+                __INTERNAL__ConcatArgs(o, __INTERNAL__getFormattedTime(), std::forward<Args>(args)...);
                 __INTERNAL__PrintToConsole(type, o.str());
                 m_logContainer.Insert({ type, o.str() });
             }
@@ -67,10 +67,10 @@ namespace CPGFramework
             }
 
             template<typename T, typename... Args>
-            void __INTERNAL__ConcatArgs(std::ostream& o, const T& t, Args&... args) 
+            void __INTERNAL__ConcatArgs(std::ostream& o, const T& t, Args&&... args) 
             {
                 __INTERNAL__ConcatArgs(o, t);
-                __INTERNAL__ConcatArgs(o, args...);
+                __INTERNAL__ConcatArgs(o, std::forward<Args>(args)...);
             }
 
         private:

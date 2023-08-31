@@ -19,9 +19,9 @@ namespace CPGFramework
             ~Entity();
 
             template<typename T, typename... TArgs>
-            T* AddComponent(TArgs... args)
+            T* AddComponent(TArgs&&... args)
             {
-                return &worldRegistry->get_or_emplace<T>(m_entt, args...);
+                return &worldRegistry->get_or_emplace<T>(m_entt, std::forward<TArgs>(args)...);
             }
 
             template<typename T>
