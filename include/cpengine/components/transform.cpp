@@ -17,8 +17,7 @@ namespace CPGFramework
     namespace Components
     {
         Transform::Transform()
-            :   worldObj(nullptr), toRootMatrix(nullptr), toWorldMatrix(MAT4_IDENTITY), localMatrix(MAT4_IDENTITY),
-                localPosition(MAT4_IDENTITY), localRotation(QUAT(VEC3(0))), localScale(MAT4_IDENTITY)
+            :   worldObj(nullptr), toRootMatrix(nullptr), toWorldMatrix(MAT4_IDENTITY), localMatrix(MAT4_IDENTITY)
         {}
 
         Transform::~Transform()
@@ -44,22 +43,13 @@ namespace CPGFramework
             }
 
             //apply to local matrix, to keep the changes from the parent.
-            DecomposedMAT4 oldMat(GetWorldMatrix());
-            Translate(oldMat.position);
-            localRotation = oldMat.rotation;
-            Scale(oldMat.scale);
-            __INTERNAL__UpdateLocalMatrix();
+            localMatrix = GetWorldMatrix();
 
             //set the new root matrix
             toRootMatrix = &target->toWorldMatrix;
 
             //apply the inverse of the new root matrix, to keep position, rotate and scale.
-            MAT4 result = glm::inverse(*toRootMatrix) * localMatrix;
-            DecomposedMAT4 resultDec(result);
-            Translate(resultDec.position);
-            localRotation = resultDec.rotation;
-            Scale(resultDec.scale);
-            __INTERNAL__UpdateLocalMatrix();
+            localMatrix = glm::inverse(*toRootMatrix) * localMatrix;
         }
 
         Transform* Transform::GetParent()
@@ -90,46 +80,41 @@ namespace CPGFramework
 
         void Transform::Translate(const VEC3& newPosition)
         {
-            localPosition = glm::translate(MAT4_IDENTITY, newPosition);
-            __INTERNAL__UpdateLocalMatrix();
+            localMatrix[3].x = newPosition.x;
+            localMatrix[3].y = newPosition.y;
+            localMatrix[3].z = newPosition.z;
         }
 
         void Transform::Translate(const VEC3& axis, const FLOAT& amount, const Space& relativeTo)
         {
-            VEC3 resultAxis = VEC3_ZERO;
-            switch (relativeTo)
-            {
-            case Space::WORLD:  resultAxis = glm::normalize(axis);                  break;
-            case Space::LOCAL:  resultAxis = localRotation * glm::normalize(axis);  break;
-            }
-
-            localPosition = glm::translate(localPosition, amount * resultAxis);
-            __INTERNAL__UpdateLocalMatrix();
+            VEC3 resultAxis = __INTERNAL__CalculateResultAxis(axis, relativeTo);
+            localMatrix = glm::translate(localMatrix, amount * resultAxis);
         }
 
         void Transform::Rotate(const VEC3& axis, const FLOAT& angle, const Space& relativeTo)
         {
-            VEC3 resultAxis = VEC3_ZERO;
-            switch (relativeTo)
-            {
-            case Space::LOCAL:  resultAxis = glm::normalize(axis);                                  break;
-            case Space::WORLD:  resultAxis = glm::inverse(localRotation) * glm::normalize(axis);    break;
-            }
-
-            localRotation = glm::rotate(localRotation, DegToRad(angle), resultAxis);
-            __INTERNAL__UpdateLocalMatrix();
+            VEC3 resultAxis = __INTERNAL__CalculateResultAxis(axis, relativeTo);
+            localMatrix = glm::rotate(localMatrix, DegToRad(angle), resultAxis);
         }
 
         void Transform::Rotate(const VEC3& rotation)
         {
-            localRotation = QUAT(rotation);
-            __INTERNAL__UpdateLocalMatrix();
+            localMatrix *= glm::toMat4(__INTERNAL__GetQuatRot(true));
+            localMatrix *= glm::toMat4(QUAT(rotation));
         }
 
         void Transform::Scale(const VEC3& scale)
         {
-            localScale = glm::scale(MAT4_IDENTITY, scale);
-            __INTERNAL__UpdateLocalMatrix();
+            //reset scale
+            VEC3 oldScale = GetScale();
+            localMatrix[0] /= oldScale.x;
+            localMatrix[1] /= oldScale.y;
+            localMatrix[2] /= oldScale.z;
+
+            //set new scale
+            localMatrix[0] *= scale.x;
+            localMatrix[1] *= scale.y;
+            localMatrix[2] *= scale.z;
         }
 
         const VEC3 Transform::GetLocalPosition() const
@@ -142,9 +127,9 @@ namespace CPGFramework
             return toWorldMatrix[3];
         }
 
-        const QUAT Transform::GetLocalRotation() const
+        const QUAT Transform::GetLocalRotation()
         {
-            return localRotation;
+            return __INTERNAL__GetQuatRot();
         }
 
         const QUAT Transform::GetWorldRotation() const
@@ -154,29 +139,39 @@ namespace CPGFramework
 
         const VEC3 Transform::GetScale() const
         {
-            return VEC3(
-                glm::length(VEC3(localMatrix[0])), 
-                glm::length(VEC3(localMatrix[1])), 
-                glm::length(VEC3(localMatrix[2]))
-                );
+            return VEC3(glm::length(VEC3(localMatrix[0])), glm::length(VEC3(localMatrix[1])), glm::length(VEC3(localMatrix[2])));
         }
 
-        const VEC3 Transform::GetRightVector() const
+        const VEC3 Transform::GetRightVector()
         {
-            return localRotation * VEC3_RIGHT;
-        }
-        const VEC3 Transform::GetUpVector() const
-        {
-            return localRotation * VEC3_UP;
-        }
-        const VEC3 Transform::GetForwardVector() const
-        {
-            return localRotation * VEC3_FORWARD;
+            return __INTERNAL__GetQuatRot() * VEC3_RIGHT;
         }
 
-        void Transform::__INTERNAL__UpdateLocalMatrix()
+        const VEC3 Transform::GetUpVector()
         {
-            localMatrix = localPosition * glm::toMat4(localRotation) * localScale;
+            return __INTERNAL__GetQuatRot() * VEC3_UP;
+        }
+
+        const VEC3 Transform::GetForwardVector()
+        {
+            return __INTERNAL__GetQuatRot() * VEC3_FORWARD;
+        }
+
+        VEC3 Transform::__INTERNAL__CalculateResultAxis(const VEC3& axis, const Space& relativeTo)
+        {
+            VEC3 normalized = glm::normalize(axis);
+            switch (relativeTo)
+            {
+                case Space::WORLD:  return __INTERNAL__GetQuatRot(true) * normalized;
+                case Space::LOCAL:  return normalized;
+                default:            return VEC3_ZERO;
+            }
+        }
+
+        QUAT Transform::__INTERNAL__GetQuatRot(const BOOL& inverse)
+        {
+            QUAT result = glm::toQuat(localMatrix);
+            return inverse ? glm::inverse(result) : result;
         }
     } // namespace Components
 } // namespace CPGFramework

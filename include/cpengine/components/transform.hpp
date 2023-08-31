@@ -54,7 +54,7 @@ namespace CPGFramework
             const VEC3 GetWorldPosition() const;
             /// @brief Get the local rotation. (use rotate methood to rotate the object).
             /// @return 
-            const QUAT GetLocalRotation() const;
+            const QUAT GetLocalRotation();
             /// @brief Get the world rotation. (use rotate method to rotate the object).
             /// @return 
             const QUAT GetWorldRotation() const;
@@ -63,15 +63,16 @@ namespace CPGFramework
             const VEC3 GetScale() const;
             /// @brief Get The right vector (local axis).
             /// @return 
-            const VEC3 GetRightVector() const;
+            const VEC3 GetRightVector();
             /// @brief Get The up vector (local axis).
             /// @return 
-            const VEC3 GetUpVector() const;
+            const VEC3 GetUpVector();
             /// @brief Get The forward vector (local axis).
-            const VEC3 GetForwardVector() const;
+            const VEC3 GetForwardVector();
 
         private:
-            void __INTERNAL__UpdateLocalMatrix();
+            VEC3 __INTERNAL__CalculateResultAxis(const VEC3& axis, const Space& relativeTo);
+            QUAT __INTERNAL__GetQuatRot(const BOOL& inverse = false);
         private:
             World::WorldClass* worldObj;
             Containers::DataTree::Node worldNode;      
@@ -79,10 +80,6 @@ namespace CPGFramework
             MAT4* toRootMatrix;
             MAT4 toWorldMatrix;
             MAT4 localMatrix;
-
-            MAT4 localPosition;
-            QUAT localRotation;
-            MAT4 localScale;
         };
     } // namespace Components
 } // namespace CPGFramework

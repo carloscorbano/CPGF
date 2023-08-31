@@ -132,8 +132,7 @@ void Game::Update()
 
     if(GetModules()->input->IsKeyPressed(Key::X))
     {
-        entityTransform->Rotate(VEC3_RIGHT, 45.0f);
-        entityTransform->Rotate(VEC3_UP, 45.0f);
+        entityTransform->Rotate(VEC3(0));
     }
 
     if(GetModules()->input->IsKeyPressed(Key::U))
